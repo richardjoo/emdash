@@ -5,6 +5,8 @@
 	"version": "1.0.0",
 	"description": "Agent-portable reimplementation of WordPress on Astro",
 	"scripts": {
+		"pretest": "pnpm run --filter @emdash-cms/auth build && pnpm run --filter @emdash-cms/registry-client build && pnpm run --filter emdash build",
+		"pretypecheck": "pnpm run --filter @emdash-cms/registry-client build && pnpm run --filter emdash build",
 		"typecheck": "pnpm run --filter {./packages/**} typecheck",
 		"typecheck:demos": "pnpm run --workspace-concurrency=1 --filter {./demos/*} --filter !@emdash-cms/demo-cloudflare typecheck",
 		"typecheck:templates": "pnpm run --workspace-concurrency=1 --filter {./templates/*} typecheck",

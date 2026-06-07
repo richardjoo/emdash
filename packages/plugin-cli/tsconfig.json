@@ -4,7 +4,11 @@
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"lib": ["es2023", "esnext.typedarrays"],
-		"types": ["node"]
+		"types": ["node"],
+		"paths": {
+			"@emdash-cms/registry-client": ["../registry-client/src/index.ts"],
+			"@emdash-cms/registry-client/env": ["../registry-client/src/env/index.ts"]
+		}
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist", "tests", "bin"]
