@@ -18,6 +18,10 @@
 		"declarationMap": true,
 		/* If NOT transpiling with TypeScript: */
 		"module": "preserve",
+		"paths": {
+			"@emdash-cms/registry-client": ["./packages/registry-client/src/index.ts"],
+			"@emdash-cms/registry-client/env": ["./packages/registry-client/src/env/index.ts"]
+		},
 		"noEmit": true,
 		/* If your code doesn't run in the DOM: */
 		"lib": ["es2023", "esnext.typedarrays"]

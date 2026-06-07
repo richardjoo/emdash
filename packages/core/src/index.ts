@@ -12,6 +12,9 @@ export type {
 export {
 	ContentRepository,
 	MediaRepository,
+	PluginStorageRepository,
+	UserRepository,
+	OptionsRepository,
 	EmDashValidationError,
 	InvalidCursorError,
 } from "./database/repositories/index.js";
@@ -93,6 +96,7 @@ export type {
 	PortableTextTextBlock,
 	PortableTextImageBlock,
 	PortableTextCodeBlock,
+	PortableTextHtmlBlock,
 	PortableTextUnknownBlock,
 	ProseMirrorMark,
 	ProseMirrorNode,
@@ -125,6 +129,8 @@ export type {
 	ResolvePathResult,
 	TranslationSummary,
 	TranslationsResult,
+	WhereRange,
+	WhereValue,
 } from "./query.js";
 
 // Request context (ALS-based ambient state for query functions)
@@ -198,7 +204,11 @@ export {
 	// Sandbox
 	NoopSandboxRunner,
 	SandboxNotAvailableError,
+	SandboxUnavailableError,
 	createNoopSandboxRunner,
+	// HTTP access for plugins (shared between in-process, Cloudflare, and workerd runners)
+	createHttpAccess,
+	createUnrestrictedHttpAccess,
 } from "./plugins/index.js";
 export type {
 	PluginDefinition,

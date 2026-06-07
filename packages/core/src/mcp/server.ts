@@ -511,12 +511,12 @@ export function createMcpServer(): McpServer {
 			if (result.success && !canReadDrafts(extra)) {
 				const data =
 					result.data && typeof result.data === "object"
-						? // eslint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- handler returns unknown data; narrowed by typeof check
+						? // eslint-disable-next-line typescript/no-unsafe-type-assertion -- handler returns unknown data; narrowed by typeof check
 							(result.data as Record<string, unknown>)
 						: undefined;
 				const item =
 					data?.item && typeof data.item === "object"
-						? // eslint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- narrowed by typeof check
+						? // eslint-disable-next-line typescript/no-unsafe-type-assertion -- narrowed by typeof check
 							(data.item as Record<string, unknown>)
 						: undefined;
 				const status = typeof item?.status === "string" ? item.status : null;
@@ -632,6 +632,12 @@ export function createMcpServer(): McpServer {
 			inputSchema: z.object({
 				collection: z.string().describe("Collection slug"),
 				id: z.string().describe("Content item ID or slug"),
+				locale: z
+					.string()
+					.optional()
+					.describe(
+						"Locale to scope slug lookup (e.g. 'fr'). Only affects slug resolution; IDs are globally unique.",
+					),
 				data: z
 					.record(z.string(), z.unknown())
 					.optional()
@@ -677,7 +683,7 @@ export function createMcpServer(): McpServer {
 			const { emdash, userId, userRole } = getExtra(extra);
 
 			// Fetch item to check ownership
-			const existing = await emdash.handleContentGet(args.collection, args.id);
+			const existing = await emdash.handleContentGet(args.collection, args.id, args.locale);
 			if (!existing.success) {
 				return unwrap(existing);
 			}
@@ -713,6 +719,7 @@ export function createMcpServer(): McpServer {
 						data: args.data,
 						slug: args.slug,
 						authorId: userId,
+						locale: args.locale,
 						seo: args.seo,
 						bylines: args.bylines,
 						publishedAt: args.publishedAt,
@@ -736,6 +743,7 @@ export function createMcpServer(): McpServer {
 						data: args.data,
 						slug: args.slug,
 						authorId: userId,
+						locale: args.locale,
 						seo: args.seo,
 						bylines: args.bylines,
 						publishedAt: args.publishedAt,
@@ -751,6 +759,7 @@ export function createMcpServer(): McpServer {
 					data: args.data,
 					slug: args.slug,
 					authorId: userId,
+					locale: args.locale,
 					seo: args.seo,
 					bylines: args.bylines,
 					publishedAt: args.publishedAt,
@@ -1140,7 +1149,7 @@ export function createMcpServer(): McpServer {
 			if (result.success && !canReadDrafts(extra)) {
 				const data =
 					result.data && typeof result.data === "object"
-						? // eslint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- handler returns unknown data; narrowed by typeof check
+						? // eslint-disable-next-line typescript/no-unsafe-type-assertion -- handler returns unknown data; narrowed by typeof check
 							(result.data as Record<string, unknown>)
 						: undefined;
 				const translations = Array.isArray(data?.translations) ? data.translations : [];

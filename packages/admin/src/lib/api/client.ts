@@ -29,8 +29,8 @@ export async function throwResponseError(res: Response, fallback: string): Promi
 	if (typeof body === "object" && body !== null && "error" in body) {
 		const { error } = body;
 		if (typeof error === "object" && error !== null && "message" in error) {
-			const { message: msg } = error;
-			if (typeof msg === "string") message = msg;
+			const { message: errorMessage } = error;
+			if (typeof errorMessage === "string") message = errorMessage;
 		}
 	}
 	throw new Error(message || `${fallback}: ${res.statusText}`);
@@ -54,6 +54,8 @@ export interface FindManyResult<T> {
  */
 export interface AdminManifest {
 	version: string;
+	/** Version of Astro the host is built with, when resolvable. */
+	astroVersion?: string;
 	hash: string;
 	collections: Record<
 		string,

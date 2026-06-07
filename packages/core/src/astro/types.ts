@@ -108,6 +108,12 @@ export interface EmDashManifest {
 	version: string;
 	commit?: string;
 	hash: string;
+	/**
+	 * Version of Astro the host project is built with. Present when the
+	 * integration could resolve it. Surfaced so the admin can evaluate a
+	 * registry plugin's `env:astro` requirement against the running host.
+	 */
+	astroVersion?: string;
 	collections: Record<string, ManifestCollection>;
 	plugins: Record<string, ManifestPlugin>;
 	/**
@@ -268,6 +274,7 @@ export interface EmDashHandlers {
 			status?: string;
 			authorId?: string | null;
 			bylines?: Array<{ bylineId: string; roleLabel?: string | null }>;
+			locale?: string;
 			seo?: {
 				title?: string | null;
 				description?: string | null;
@@ -385,6 +392,14 @@ export interface EmDashHandlers {
 		request: Request,
 	) => Promise<HandlerResponse>;
 
+	// Public-only plugin API route handler for SSR page components.
+	handlePublicPluginApiRoute: (
+		pluginId: string,
+		method: string,
+		path: string,
+		request: Request,
+	) => Promise<HandlerResponse>;
+
 	// Plugin route metadata (for auth decisions before dispatch)
 	getPluginRouteMeta: (pluginId: string, path: string) => { public: boolean } | null;
 
@@ -426,6 +441,10 @@ export interface EmDashHandlers {
 
 	// Sandbox runner (for marketplace plugin install/update)
 	getSandboxRunner: () => import("../plugins/sandbox/types.js").SandboxRunner | null;
+
+	// Whether sandbox bypass mode (sandbox: false) is active. Marketplace
+	// install/update routes use this to skip the SANDBOX_NOT_AVAILABLE gate.
+	isSandboxBypassed: () => boolean;
 
 	// Sync marketplace plugin states (after install/update/uninstall)
 	syncMarketplacePlugins: () => Promise<void>;
