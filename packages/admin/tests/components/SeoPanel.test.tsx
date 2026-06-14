@@ -6,6 +6,9 @@ import { userEvent } from "vitest/browser";
 import { SeoPanel } from "../../src/components/SeoPanel";
 import { render } from "../utils/render";
 
+const SEO_TEXT_DEBOUNCE_MS = 500;
+type SeoState = NonNullable<React.ComponentProps<typeof SeoPanel>["seo"]>;
+
 // SeoPanel renders SeoImageField, which uses MediaPickerModal -- that hooks
 // into react-query. Tests need a QueryClient in scope even when the modal is
 // not opened, because the hook is called on the initial render.
@@ -69,36 +72,37 @@ describe("SeoPanel", () => {
 	});
 
 	it("debounces text field saves", async () => {
+		vi.useFakeTimers();
 		const onChange = vi.fn();
 
-		const screen = await render(
-			<QueryWrapper>
-				<SeoPanel
-					contentKey="post-1"
-					seo={{ title: "", description: null, image: null, canonical: null, noIndex: false }}
-					onChange={onChange}
-				/>
-			</QueryWrapper>,
-		);
+		try {
+			const screen = await render(
+				<QueryWrapper>
+					<SeoPanel
+						contentKey="post-1"
+						seo={{ title: "", description: null, image: null, canonical: null, noIndex: false }}
+						onChange={onChange}
+					/>
+				</QueryWrapper>,
+			);
 
-		const titleInput = screen.getByLabelText("SEO Title");
-		await userEvent.type(titleInput, "SEO title");
+			const titleInput = screen.getByLabelText("SEO Title");
+			await titleInput.fill("SEO title");
 
-		await new Promise((resolve) => setTimeout(resolve, 100));
-		expect(onChange).not.toHaveBeenCalled();
+			await vi.advanceTimersByTimeAsync(100);
+			expect(onChange).not.toHaveBeenCalled();
 
-		await vi.waitFor(
-			() => {
-				expect(onChange).toHaveBeenCalledTimes(1);
-			},
-			{ timeout: 1500 },
-		);
-		expect(onChange).toHaveBeenLastCalledWith({
-			title: "SEO title",
-			description: null,
-			canonical: null,
-			noIndex: false,
-		});
+			await vi.advanceTimersByTimeAsync(SEO_TEXT_DEBOUNCE_MS);
+			expect(onChange).toHaveBeenCalledTimes(1);
+			expect(onChange).toHaveBeenLastCalledWith({
+				title: "SEO title",
+				description: null,
+				canonical: null,
+				noIndex: false,
+			});
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it("saves noindex changes immediately", async () => {
@@ -128,7 +132,7 @@ describe("SeoPanel", () => {
 
 	it("does not overwrite newer local text when stale props arrive", async () => {
 		function Host() {
-			const [seo, setSeo] = React.useState({
+			const [seo, setSeo] = React.useState<SeoState>({
 				title: "Original",
 				description: null,
 				image: null,
@@ -176,11 +180,12 @@ describe("SeoPanel", () => {
 	});
 
 	it("resets when switching to a different content item", async () => {
+		vi.useFakeTimers();
 		const onChange = vi.fn();
 
 		function Host() {
 			const [contentKey, setContentKey] = React.useState("post-1");
-			const [seo, setSeo] = React.useState({
+			const [seo, setSeo] = React.useState<SeoState>({
 				title: "First post",
 				description: null,
 				image: null,
@@ -210,27 +215,31 @@ describe("SeoPanel", () => {
 			);
 		}
 
-		const screen = await render(
-			<QueryWrapper>
-				<Host />
-			</QueryWrapper>,
-		);
-		const titleInput = screen.getByLabelText("SEO Title");
-		await userEvent.clear(titleInput);
-		await userEvent.type(titleInput, "Unsaved local edit");
+		try {
+			const screen = await render(
+				<QueryWrapper>
+					<Host />
+				</QueryWrapper>,
+			);
+			const titleInput = screen.getByLabelText("SEO Title");
+			await titleInput.fill("Unsaved local edit");
 
-		await userEvent.click(screen.getByRole("button", { name: "Switch content" }));
+			await screen.getByRole("button", { name: "Switch content" }).click();
 
-		expect(onChange).toHaveBeenCalledWith({
-			title: "Unsaved local edit",
-			description: null,
-			canonical: null,
-			noIndex: false,
-		});
-		expect((titleInput.element() as HTMLInputElement).value).toBe("Second post");
+			expect(onChange).toHaveBeenCalledTimes(1);
+			expect(onChange).toHaveBeenLastCalledWith({
+				title: "Unsaved local edit",
+				description: null,
+				canonical: null,
+				noIndex: false,
+			});
+			expect((titleInput.element() as HTMLInputElement).value).toBe("Second post");
 
-		await new Promise((resolve) => setTimeout(resolve, 700));
-		expect(onChange).toHaveBeenCalledTimes(1);
+			await vi.advanceTimersByTimeAsync(SEO_TEXT_DEBOUNCE_MS + 200);
+			expect(onChange).toHaveBeenCalledTimes(1);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it("flushes pending text changes on unmount", async () => {

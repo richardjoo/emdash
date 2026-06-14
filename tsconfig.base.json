@@ -4,6 +4,10 @@
 		"module": "preserve",
 		"lib": ["ES2024"],
 		"moduleResolution": "bundler",
+		"paths": {
+			"@emdash-cms/registry-client": ["./packages/registry-client/src/index.ts"],
+			"@emdash-cms/registry-client/env": ["./packages/registry-client/src/env/index.ts"]
+		},
 		"resolveJsonModule": true,
 		"allowJs": false,
 		"strict": true,
