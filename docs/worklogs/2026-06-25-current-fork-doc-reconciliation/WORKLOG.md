@@ -42,10 +42,12 @@
 9. Created `docs/worklogs/` and the dated handover package for this pass.
 
 10. Ran final verification on the docs-only changes.
-   - Formatted changed Markdown files with `pnpm exec prettier --write`.
-   - `pnpm lint:quick` passed.
-   - `pnpm typecheck` failed in `packages/plugin-cli` because it imports missing exports from `@emdash-cms/plugin-types`.
+
+- Formatted changed Markdown files with `pnpm exec prettier --write`.
+- `pnpm lint:quick` passed.
+- `pnpm typecheck` failed in `packages/plugin-cli` because it imports missing exports from `@emdash-cms/plugin-types`.
 
 11. Logged the verification-discovered repo issues for the next AI.
-   - Added TODO follow-ups for screenshot automation and the `plugin-cli` typecheck failure.
-   - Marked those as repo-level risks rather than canonical-doc ambiguities.
+
+- Added TODO follow-ups for screenshot automation and the `plugin-cli` typecheck failure.
+- Marked those as repo-level risks rather than canonical-doc ambiguities.
