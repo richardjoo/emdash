@@ -13,9 +13,9 @@ import { isParseError, parseBody } from "#api/parse.js";
 import { getPublicOrigin } from "#api/public-url.js";
 import { setupBody } from "#api/schemas.js";
 import { getAuthMode } from "#auth/mode.js";
+import { applySeedWithSchemaRepair } from "./seed-repair.js";
 import { runMigrations } from "#db/migrations/runner.js";
 import { OptionsRepository } from "#db/repositories/options.js";
-import { applySeedWithSchemaRepair } from "#astro/routes/api/setup/seed-repair.js";
 import { loadSeed } from "#seed/load.js";
 import { validateSeed } from "#seed/validate.js";
 

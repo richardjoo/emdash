@@ -11,7 +11,7 @@ export const prerender = false;
 import { createAuthorizationUrl, type OAuthConsumerConfig } from "@emdash-cms/auth";
 
 import { getPublicOrigin } from "#api/public-url.js";
-import { resolveOAuthEnv } from "#astro/routes/api/auth/oauth/env.js";
+import { resolveOAuthEnv } from "./env.js";
 import { createOAuthStateStore } from "#auth/oauth-state-store.js";
 
 type ProviderName = "github" | "google";

@@ -19,7 +19,7 @@ import { createKyselyAdapter } from "@emdash-cms/auth/adapters/kysely";
 
 import { getPublicOrigin } from "#api/public-url.js";
 import { finalizeSetup } from "#api/setup-complete.js";
-import { resolveOAuthEnv } from "#astro/routes/api/auth/oauth/env.js";
+import { resolveOAuthEnv } from "../env.js";
 import { createOAuthStateStore } from "#auth/oauth-state-store.js";
 import { OptionsRepository } from "#db/repositories/options.js";
 

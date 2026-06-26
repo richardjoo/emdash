@@ -26,9 +26,9 @@ import { escapeHtml } from "#api/escape.js";
 import { deleteApiTokensByName, handleApiTokenCreate } from "#api/handlers/api-tokens.js";
 import { getPublicOrigin } from "#api/public-url.js";
 import { isSafeRedirect } from "#api/redirect.js";
+import { applySeedWithSchemaRepair } from "./seed-repair.js";
 import { runMigrations } from "#db/migrations/runner.js";
 import { OptionsRepository } from "#db/repositories/options.js";
-import { applySeedWithSchemaRepair } from "#astro/routes/api/setup/seed-repair.js";
 import { loadSeed } from "#seed/load.js";
 import { validateSeed } from "#seed/validate.js";
 
