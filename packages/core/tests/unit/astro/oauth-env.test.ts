@@ -16,9 +16,9 @@ describe("resolveOAuthEnv", () => {
 	it("falls back to cloudflare:workers env when runtime locals are absent", async () => {
 		const env = { GITHUB_CLIENT_ID: "workers-id" };
 
-		await expect(resolveOAuthEnv({}, { GITHUB_CLIENT_ID: "fallback-id" }, async () => env)).resolves.toBe(
-			env,
-		);
+		await expect(
+			resolveOAuthEnv({}, { GITHUB_CLIENT_ID: "fallback-id" }, async () => env),
+		).resolves.toBe(env);
 	});
 
 	it("fails closed to import.meta.env when the workers env import is unavailable", async () => {

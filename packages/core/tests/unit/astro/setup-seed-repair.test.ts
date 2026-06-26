@@ -24,7 +24,9 @@ describe("applySeedWithSchemaRepair", () => {
 		const final = { content: { created: 7 } } as any;
 		const apply = vi
 			.fn()
-			.mockRejectedValueOnce(new Error("table ec_pages has no column named featured_image: SQLITE_ERROR"))
+			.mockRejectedValueOnce(
+				new Error("table ec_pages has no column named featured_image: SQLITE_ERROR"),
+			)
 			.mockResolvedValueOnce(repaired)
 			.mockResolvedValueOnce(final);
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});

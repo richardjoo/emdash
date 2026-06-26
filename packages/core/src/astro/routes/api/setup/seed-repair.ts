@@ -1,9 +1,8 @@
 import type { Kysely } from "kysely";
 
+import type { Database } from "#db/types.js";
 import { applySeed } from "#seed/apply.js";
 import type { SeedApplyOptions, SeedApplyResult, SeedFile } from "#seed/types.js";
-
-import type { Database } from "#db/types.js";
 
 const SEED_SCHEMA_DRIFT_PATTERN = /has no column named|no such column|no such table/i;
 
@@ -36,6 +35,8 @@ export async function applySeedWithSchemaRepair(
 			message,
 		);
 
+		// Repair the declared schema shape first so the second pass can safely
+		// write content rows against the now-current table definition.
 		await apply(db, seed, {
 			...options,
 			includeContent: false,

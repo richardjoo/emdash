@@ -26,11 +26,12 @@ import { escapeHtml } from "#api/escape.js";
 import { deleteApiTokensByName, handleApiTokenCreate } from "#api/handlers/api-tokens.js";
 import { getPublicOrigin } from "#api/public-url.js";
 import { isSafeRedirect } from "#api/redirect.js";
-import { applySeedWithSchemaRepair } from "./seed-repair.js";
 import { runMigrations } from "#db/migrations/runner.js";
 import { OptionsRepository } from "#db/repositories/options.js";
 import { loadSeed } from "#seed/load.js";
 import { validateSeed } from "#seed/validate.js";
+
+import { applySeedWithSchemaRepair } from "./seed-repair.js";
 
 // RBAC role levels (matching @emdash-cms/auth)
 const ROLE_ADMIN = 50;
@@ -65,9 +66,9 @@ async function handleDevBypass(context: Parameters<APIRoute>[0]): Promise<Respon
 				emdash.db,
 				seed,
 				{
-				includeContent: true,
-				onConflict: "skip",
-				storage: emdash.storage ?? undefined,
+					includeContent: true,
+					onConflict: "skip",
+					storage: emdash.storage ?? undefined,
 				},
 				"[setup-dev-bypass]",
 			);
