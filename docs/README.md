@@ -2,7 +2,13 @@
 
 Documentation site for EmDash, built with [Starlight](https://starlight.astro.build).
 
+Canonical repository governance lives in the root `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, and `TEMPLATES.md` files.
+
+Published docs content lives under `docs/src/content/docs/`. Internal AI-facing work logs and handover packages live under `docs/worklogs/` and are not part of the public docs site.
+
 ## Development
+
+Run these commands from `docs/`:
 
 ```bash
 pnpm dev
@@ -21,6 +27,8 @@ The `/mcp` endpoint still works, but it returns a helpful message until a
 Cloudflare AI Search binding is configured.
 
 ## Build
+
+Run from `docs/`:
 
 ```bash
 pnpm build

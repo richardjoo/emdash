@@ -27,6 +27,8 @@ cd demos/simple
 pnpm dev    # http://localhost:4321
 ```
 
+From the repository root, the equivalent command is `pnpm --filter emdash-demo dev`.
+
 Open the admin at `http://localhost:4321/_emdash/admin`. The setup wizard runs on first launch.
 
 In dev, skip passkey auth with the dev bypass:
@@ -255,6 +257,8 @@ For RTL rules and the full Lingui pattern reference, see [AGENTS.md § Admin UI:
 ## Getting Help
 
 - [AGENTS.md](AGENTS.md) -- architecture and code patterns
+- [TEMPLATES.md](TEMPLATES.md) -- template maintenance and sync workflows
+- [docs/README.md](docs/README.md) -- docs site development and internal docs/worklog boundaries
 - [docs.emdashcms.com](https://docs.emdashcms.com) -- user guides and API reference
 - [Discussions](https://github.com/emdash-cms/emdash/discussions) -- ask questions, propose features
 - [Issues](https://github.com/emdash-cms/emdash/issues) -- bug reports
