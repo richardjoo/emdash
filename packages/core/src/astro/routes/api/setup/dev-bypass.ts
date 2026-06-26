@@ -28,7 +28,7 @@ import { getPublicOrigin } from "#api/public-url.js";
 import { isSafeRedirect } from "#api/redirect.js";
 import { runMigrations } from "#db/migrations/runner.js";
 import { OptionsRepository } from "#db/repositories/options.js";
-import { applySeed } from "#seed/apply.js";
+import { applySeedWithSchemaRepair } from "#astro/routes/api/setup/seed-repair.js";
 import { loadSeed } from "#seed/load.js";
 import { validateSeed } from "#seed/validate.js";
 
@@ -61,11 +61,16 @@ async function handleDevBypass(context: Parameters<APIRoute>[0]): Promise<Respon
 		const seed = await loadSeed();
 		const validation = validateSeed(seed);
 		if (validation.valid) {
-			const seedResult = await applySeed(emdash.db, seed, {
+			const seedResult = await applySeedWithSchemaRepair(
+				emdash.db,
+				seed,
+				{
 				includeContent: true,
 				onConflict: "skip",
 				storage: emdash.storage ?? undefined,
-			});
+				},
+				"[setup-dev-bypass]",
+			);
 			console.log(
 				`[setup-dev-bypass] Seed applied: ${seedResult.collections.created} collections, ${seedResult.fields.created} fields`,
 			);
