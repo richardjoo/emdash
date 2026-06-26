@@ -15,9 +15,10 @@ import { setupBody } from "#api/schemas.js";
 import { getAuthMode } from "#auth/mode.js";
 import { runMigrations } from "#db/migrations/runner.js";
 import { OptionsRepository } from "#db/repositories/options.js";
-import { applySeed } from "#seed/apply.js";
 import { loadSeed } from "#seed/load.js";
 import { validateSeed } from "#seed/validate.js";
+
+import { applySeedWithSchemaRepair } from "./seed-repair.js";
 
 export const POST: APIRoute = async ({ request, url, locals }) => {
 	const { emdash } = locals;
@@ -70,11 +71,16 @@ export const POST: APIRoute = async ({ request, url, locals }) => {
 
 		let result;
 		try {
-			result = await applySeed(emdash.db, seed, {
-				includeContent: body.includeContent,
-				onConflict: "skip",
-				storage: emdash.storage ?? undefined,
-			});
+			result = await applySeedWithSchemaRepair(
+				emdash.db,
+				seed,
+				{
+					includeContent: body.includeContent,
+					onConflict: "skip",
+					storage: emdash.storage ?? undefined,
+				},
+				"[setup]",
+			);
 		} catch (error) {
 			return handleError(error, "Failed to apply seed", "SEED_ERROR");
 		}

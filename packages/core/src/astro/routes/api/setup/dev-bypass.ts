@@ -28,9 +28,10 @@ import { getPublicOrigin } from "#api/public-url.js";
 import { isSafeRedirect } from "#api/redirect.js";
 import { runMigrations } from "#db/migrations/runner.js";
 import { OptionsRepository } from "#db/repositories/options.js";
-import { applySeed } from "#seed/apply.js";
 import { loadSeed } from "#seed/load.js";
 import { validateSeed } from "#seed/validate.js";
+
+import { applySeedWithSchemaRepair } from "./seed-repair.js";
 
 // RBAC role levels (matching @emdash-cms/auth)
 const ROLE_ADMIN = 50;
@@ -61,11 +62,16 @@ async function handleDevBypass(context: Parameters<APIRoute>[0]): Promise<Respon
 		const seed = await loadSeed();
 		const validation = validateSeed(seed);
 		if (validation.valid) {
-			const seedResult = await applySeed(emdash.db, seed, {
-				includeContent: true,
-				onConflict: "skip",
-				storage: emdash.storage ?? undefined,
-			});
+			const seedResult = await applySeedWithSchemaRepair(
+				emdash.db,
+				seed,
+				{
+					includeContent: true,
+					onConflict: "skip",
+					storage: emdash.storage ?? undefined,
+				},
+				"[setup-dev-bypass]",
+			);
 			console.log(
 				`[setup-dev-bypass] Seed applied: ${seedResult.collections.created} collections, ${seedResult.fields.created} fields`,
 			);
