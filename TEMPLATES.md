@@ -1,6 +1,6 @@
 # EmDash Templates
 
-Starter templates for building sites with EmDash CMS. Each template includes a seed file with demo content, so you can see how everything works right away.
+Contributor and maintainer guide for the starter templates shipped in this repository. Each template includes a seed file with demo content so you can see how everything works right away.
 
 ## Available Templates
 
@@ -52,6 +52,8 @@ A portfolio for showcasing creative work with project pages and tag filtering.
 
 ## Using a Template
 
+These templates are workspace members in the monorepo. If you want to create a site outside this repository, use `npm create emdash@latest` instead of copying a workspace package directly.
+
 Each template has two variants:
 
 - **Node.js** (`templates/blog`, `templates/marketing`, `templates/portfolio`) — uses SQLite and local file storage
@@ -60,21 +62,17 @@ Each template has two variants:
 ### Quick Start
 
 ```bash
-# Copy the template you want
-cp -r templates/blog my-site
-cd my-site
-
-# Install dependencies
+# From the repository root
 pnpm install
 
-# Initialize the database and seed demo content
-pnpm bootstrap
-
-# Start the dev server
+# Start the template dev server
+cd templates/blog
 pnpm dev
 ```
 
 Open http://localhost:4321 to see your site, and http://localhost:4321/\_emdash/admin for the CMS.
+
+The configured seed applies automatically on the first request when the database is empty. To start fresh during iteration, delete the local database (`data.db`) or reset the configured D1 binding, then restart the dev server.
 
 ### Template Structure
 
@@ -138,7 +136,9 @@ pnpm screenshots blog
 pnpm screenshots blog marketing
 ```
 
-The script starts each template's dev server, captures screenshots, then stops the server before moving to the next template.
+Current fork note: the screenshot harness still runs each template's `bootstrap` script before it starts the dev server. The template packages in this repository no longer define `bootstrap`, so `pnpm screenshots` currently fails until the harness or package scripts are reconciled.
+
+Intended behavior after that repair: the script starts each template's dev server, captures screenshots, then stops the server before moving to the next template.
 
 Page definitions are in `templates/screenshots.json`. Each page is captured at desktop (1440x900) and mobile (390x844) in both light and dark mode at 2x resolution. Screenshots are JPEG at 80% quality.
 

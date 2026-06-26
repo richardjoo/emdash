@@ -4,6 +4,8 @@ For human-facing contributor info (setup, repo layout, PR policy, changesets, i1
 
 `CLAUDE.md` is a symlink to this file. `.opencode/skills` and `.claude/skills` are symlinks to `skills/`. Don't try to sync between them.
 
+Internal project handovers and work logs live under `docs/worklogs/`. When present, start with `docs/worklogs/README.md` and the newest dated folder that matches your task.
+
 # Rules
 
 **Backwards compatibility matters.** EmDash is published and in active use, pre-1.0. Prefer additive changes (new fields, new routes, new options with defaults). Breaking changes need an explicit decision, a package bump, and a changeset that calls the break out clearly. Database migrations are forward-only -- never write one that leaves existing content inaccessible. When in doubt, open a Discussion.
@@ -19,6 +21,8 @@ For human-facing contributor info (setup, repo layout, PR policy, changesets, i1
 **CRITICAL: If this repository is being worked from a fork, check upstream before doing substantive work.** Run `git fetch upstream --prune` and compare your branch or `origin/main` against `upstream/main` first. If the fork is substantially behind, sync or explicitly account for that drift before editing code.
 
 Run `pnpm lint:json | jq '.diagnostics | length'` before starting and confirm it's clean -- if it's failing after your edits, your changes caused it.
+
+If repo commands fail before the workspace even loads, switch to the Node version pinned in `.nvmrc` first. Running under the wrong Node version can break `pnpm`/`oxlint` before you reach repo checks.
 
 During work:
 

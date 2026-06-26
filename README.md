@@ -137,7 +137,7 @@ const { entries: posts } = await getEmDashCollection("posts");
 
 **Admin** -- Full admin panel with visual schema builder, media library (drag-drop uploads via signed URLs), navigation menus, taxonomies, widgets, and a WordPress import wizard.
 
-**Auth** -- Passkey-first (WebAuthn) with OAuth and magic link fallbacks. Role-based access control: Administrator, Editor, Author, Contributor.
+**Auth** -- Passkey-first (WebAuthn) with OAuth and magic link fallbacks. Role-based access control: Subscriber, Contributor, Author, Editor, Administrator.
 
 **Plugins** -- `definePlugin()` API with lifecycle hooks, KV storage, settings, admin pages, dashboard widgets, custom block types, and API routes. Sandboxed execution on Cloudflare via Dynamic Worker Loaders.
 
@@ -177,9 +177,10 @@ pnpm build
 Run the demo (Node.js + SQLite, no Cloudflare account needed):
 
 ```bash
-pnpm --filter emdash-demo seed
 pnpm --filter emdash-demo dev
 ```
+
+The demo applies `seed/seed.json` automatically on the first request when the database is empty, so there is no separate seed or bootstrap step.
 
 Open the admin at [http://localhost:4321/\_emdash/admin](http://localhost:4321/_emdash/admin).
 
@@ -190,7 +191,12 @@ pnpm lint:quick    # fast lint (< 1s)
 pnpm format        # format with oxfmt
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contributor guide.
+Repository guides:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) -- contributor workflow, PR policy, and changesets
+- [AGENTS.md](AGENTS.md) -- agent-oriented repository rules and code patterns
+- [TEMPLATES.md](TEMPLATES.md) -- template maintenance, sync, and screenshot workflows
+- [docs/README.md](docs/README.md) -- docs site development and internal docs/worklog layout
 
 ## Repository Structure
 
