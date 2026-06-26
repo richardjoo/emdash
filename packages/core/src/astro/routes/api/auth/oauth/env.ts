@@ -10,7 +10,11 @@ function hasRuntimeEnv(value: unknown): value is { runtime: { env: Record<string
 async function loadWorkersEnv(): Promise<Record<string, unknown> | undefined> {
 	try {
 		const { env } = await import("cloudflare:workers");
-		return env as Record<string, unknown>;
+		if (typeof env === "object" && env !== null) {
+			return Object.fromEntries(Object.entries(env));
+		}
+
+		return undefined;
 	} catch {
 		return undefined;
 	}
