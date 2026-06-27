@@ -20,7 +20,7 @@ Single-agent mode is the default for any work that changes the CMS contract acro
 1. Fetch and assess `upstream/main` in `richardjoo/emdash`.
 2. Apply, verify, and merge orchestrator repo changes first.
 3. Decide the child-site consumption target.
-Line after step 3: default target is a released npm package version; if a local patch is still required, record the exception before editing child sites.
+   Line after step 3: default target is a released npm package version; if a local patch is still required, record the exception before editing child sites.
 4. Update child sites one at a time.
 5. Run local verification per child site.
 6. Push PRs, wait for green CI, and merge in dependency order.

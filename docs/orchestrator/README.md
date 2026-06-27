@@ -29,11 +29,11 @@ These are emergency-only exceptions and require an explicit orchestrator decisio
 
 ## Mode Selection
 
-| Mode | Use when | Owner |
-| --- | --- | --- |
-| Single-agent mode | Upstream sync, package/runtime changes, dependency alignment, patch removal, shared security/config work | Orchestrator agent |
-| Two-agent mode | Site-local work only: content, images, copy, layout tweaks, page SEO, non-contract local ops | Site agent under orchestrator handoff |
-| Hybrid mode | Complex work where the package contract changes first and site-specific execution follows | Orchestrator agent + site agent with strict handoff |
+| Mode              | Use when                                                                                                 | Owner                                               |
+| ----------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Single-agent mode | Upstream sync, package/runtime changes, dependency alignment, patch removal, shared security/config work | Orchestrator agent                                  |
+| Two-agent mode    | Site-local work only: content, images, copy, layout tweaks, page SEO, non-contract local ops             | Site agent under orchestrator handoff               |
+| Hybrid mode       | Complex work where the package contract changes first and site-specific execution follows                | Orchestrator agent + site agent with strict handoff |
 
 ## Hard Rules
 
