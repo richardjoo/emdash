@@ -196,6 +196,7 @@ Repository guides:
 - [CONTRIBUTING.md](CONTRIBUTING.md) -- contributor workflow, PR policy, and changesets
 - [AGENTS.md](AGENTS.md) -- agent-oriented repository rules and code patterns
 - [TEMPLATES.md](TEMPLATES.md) -- template maintenance, sync, and screenshot workflows
+- [docs/orchestrator/README.md](docs/orchestrator/README.md) -- cross-repo CMS orchestration governance for child site repos
 - [docs/README.md](docs/README.md) -- docs site development and internal docs/worklog layout
 
 ## Repository Structure

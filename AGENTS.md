@@ -4,6 +4,8 @@ For human-facing contributor info (setup, repo layout, PR policy, changesets, i1
 
 `CLAUDE.md` is a symlink to this file. `.opencode/skills` and `.claude/skills` are symlinks to `skills/`. Don't try to sync between them.
 
+Cross-repo CMS orchestration governance lives under `docs/orchestrator/`. Read `docs/orchestrator/README.md` before doing work that spans this repo and child site repos.
+
 Internal project handovers and work logs live under `docs/worklogs/`. When present, start with `docs/worklogs/README.md` and the newest dated folder that matches your task.
 
 # Rules
