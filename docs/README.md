@@ -4,7 +4,7 @@ Documentation site for EmDash, built with [Starlight](https://starlight.astro.bu
 
 Canonical repository governance lives in the root `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, and `TEMPLATES.md` files.
 
-Published docs content lives under `docs/src/content/docs/`. Internal AI-facing work logs and handover packages live under `docs/worklogs/` and are not part of the public docs site.
+Published docs content lives under `docs/src/content/docs/`. Internal AI-facing orchestration governance lives under `docs/orchestrator/`. Internal work logs and handover packages live under `docs/worklogs/`. Neither internal directory is part of the public docs site.
 
 ## Development
 
