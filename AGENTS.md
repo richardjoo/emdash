@@ -1,6 +1,6 @@
 This file provides guidance to agentic coding tools working in this repository.
 
-For human-facing contributor info (setup, repo layout, PR policy, changesets, i18n), see [CONTRIBUTING.md](CONTRIBUTING.md). This file focuses on the patterns and gotchas an agent needs to write correct code.
+For human-facing contributor info (setup, repo layout, PR policy, changesets, i18n), see `CONTRIBUTING.md`. This file focuses on the patterns and gotchas an agent needs to write correct code.
 
 `CLAUDE.md` is a symlink to this file. `.opencode/skills` and `.claude/skills` are symlinks to `skills/`. Don't try to sync between them.
 
@@ -16,7 +16,7 @@ Internal project handovers and work logs live under `docs/worklogs/`. When prese
 
 **Localize everything user-facing.** All admin UI strings, aria labels, and toast messages go through Lingui. All admin layout uses RTL-safe logical Tailwind classes. See [Localization](#admin-ui-localization-lingui) and [RTL](#admin-ui-rtl-safe-tailwind).
 
-**Scope discipline.** No drive-by refactors, no bulk lint/type cleanups, no "while I'm here" edits in unrelated files. If you see a systemic issue, open a Discussion. See [CONTRIBUTING.md § Contribution Policy](CONTRIBUTING.md#contribution-policy).
+**Scope discipline.** No drive-by refactors, no bulk lint/type cleanups, no "while I'm here" edits in unrelated files. If you see a systemic issue, open a Discussion. See `CONTRIBUTING.md`, section `Contribution Policy`.
 
 ## Workflow
 
@@ -32,7 +32,7 @@ During work:
 - `pnpm typecheck` (packages) or `pnpm typecheck:demos` (Astro demos) after each round of edits
 - `pnpm format` regularly (oxfmt, tabs)
 
-Before opening a PR: tests pass, lint clean, formatted, changeset added if a published package changed. See [CONTRIBUTING.md § Changesets](CONTRIBUTING.md#changesets).
+Before opening a PR: tests pass, lint clean, formatted, changeset added if a published package changed. See `CONTRIBUTING.md`, section `Changesets`.
 
 A changeset is release notes a user reads while upgrading -- **not** a commit message, PR description, or summary of your diff. Do not paste your PR prose into it. Write for someone who will run the new version and wants to know what changed for them: lead with a present-tense verb (`Fixes`, `Adds`, `Updates`, `Removes`), describe the observable effect, and leave out internal mechanics (file names, refactors, how you implemented it). For a breaking change, include the migration step. One sentence is often enough.
 
