@@ -57,7 +57,7 @@ jobs:
 
       - name: Run formatter
         if: steps.config.outputs.enabled == 'true'
-        run: npx oxfmt --ignore-path .gitignore
+        run: npx oxfmt@0.58.0 --ignore-path .gitignore
 
       - name: Compute patch
         if: steps.config.outputs.enabled == 'true'

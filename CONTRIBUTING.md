@@ -261,6 +261,7 @@ For RTL rules and the full Lingui pattern reference, see [AGENTS.md § Admin UI:
 - [AGENTS.md](AGENTS.md) -- architecture and code patterns
 - [TEMPLATES.md](TEMPLATES.md) -- template maintenance and sync workflows
 - [docs/README.md](docs/README.md) -- docs site development and internal docs/worklog boundaries
+- [TRIAGE.md](TRIAGE.md) -- guidance for community triagers
 - [docs.emdashcms.com](https://docs.emdashcms.com) -- user guides and API reference
 - [Discussions](https://github.com/emdash-cms/emdash/discussions) -- ask questions, propose features
 - [Issues](https://github.com/emdash-cms/emdash/issues) -- bug reports
