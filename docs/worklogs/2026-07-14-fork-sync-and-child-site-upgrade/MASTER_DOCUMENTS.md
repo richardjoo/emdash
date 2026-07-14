@@ -41,3 +41,4 @@ This handover package is keyed to the current fork state after syncing `richardj
 - `pnpm lint:quick` and `pnpm lint:json` currently panic inside `oxlint` under Node `22.22.2`; treat that as an existing repo issue.
 - `pnpm build` currently passes, and `pnpm typecheck` passes after the fresh build.
 - `scripts/screenshot-all-templates.mjs` still invokes `pnpm bootstrap`, while the template packages do not define `bootstrap`.
+- The local `richardjoo-com` checkout is not currently clean even though `origin/main` contains the verified upgrade commit; newer uncommitted docs changes exist there and must be inspected before more child-site work.

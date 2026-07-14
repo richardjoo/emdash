@@ -13,6 +13,7 @@ Internal AI-facing handover package for the upstream sync, child-site upgrade, a
 - Baseline lint under Node `22.22.2`: `pnpm lint:json` currently panics inside `oxlint`
 - Post-sync verification in `richardjoo/emdash`: `pnpm build` passed; `pnpm typecheck` passed after the fresh build
 - Post-upgrade verification in `richardjoo-com`: `pnpm typecheck` passed; `pnpm build` passed
+- Final child-site worktree check: `richardjoo-com` has newer uncommitted local docs changes (`AGENTS.md`, `README.md`, `docs/cloudflare-site-runbook.md`, `docs/handover/`) that were not made in this pass
 
 ## Contents
 

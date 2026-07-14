@@ -57,6 +57,16 @@
 8. Created the new dated handover package.
    - Added this folder under `docs/worklogs/` with the requested inventory, changelog, TODOs, dependency map, worklog, handover, checklist, and next-AI rules.
 
+9. Performed a final cross-repo clean-state check.
+   - `richardjoo/emdash` was clean after the handover-package commit and push.
+   - `richardjoo-com` was no longer clean locally even though `origin/main` already contained the verified upgrade commit.
+   - The local child-site checkout had newer uncommitted changes in:
+     - `AGENTS.md`
+     - `README.md`
+     - `docs/cloudflare-site-runbook.md`
+     - `docs/handover/`
+   - Those changes were not made in this pass, so they were preserved as-is and recorded here for the next AI.
+
 ## Decisions
 
 - Syncing the fork is now treated as mandatory before any other substantive work whenever `origin/main` is behind `upstream/main`.

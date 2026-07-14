@@ -22,6 +22,8 @@ The key sync and propagation commits are:
 
 `richardjoo-com` now consumes released `emdash@0.28.1` and `@emdash-cms/cloudflare@0.28.1`. The old `patches/emdash@0.23.0.patch` exception is gone, and the registry records `none` for the local patch exception.
 
+One important local-state caveat was discovered at the final check: the `richardjoo-com` checkout is not currently clean anymore. Its pushed `main` branch contains the verified upgrade commit, but the local checkout now also has newer uncommitted docs changes in `AGENTS.md`, `README.md`, `docs/cloudflare-site-runbook.md`, and `docs/handover/`. Those changes were not made in this pass and were left untouched.
+
 The canonical/orchestrator docs are now aligned around the actual repo state:
 
 - `AGENTS.md` describes the real `.claude` symlink layout and no longer claims a root `CLAUDE.md` or `.opencode/skills` symlink that does not exist
@@ -56,6 +58,9 @@ That lint failure is the main repo-level verification gap still open.
 4. Broader docs outside the canonical/orchestrator set were not fully audited in this pass.
    - Package READMEs and published docs-site pages may still contain stale or conflicting operational language.
 
+5. The local `richardjoo-com` checkout contains uncommitted changes outside this handover pass.
+   - The next AI must inspect that child-site worktree before assuming it is safe to edit or before trying to return all repos to a clean `main` state.
+
 ## Recommended Next Actions
 
 1. Investigate and resolve the `oxlint` panic so `pnpm lint:quick` and `pnpm lint:json` work again.
@@ -64,8 +69,9 @@ That lint failure is the main repo-level verification gap still open.
    - compare `origin/main` vs `upstream/main`
    - sync the fork first if behind
    - then update affected child sites serially
-4. Standardize `richardjoo-com` to the child-site doc standard when that operational docs work is in scope.
-5. If doc-cleanup scope expands, audit package READMEs and `docs/src/content/docs/` against the now-current canonical/orchestrator guidance.
+4. Inspect and reconcile the current uncommitted `richardjoo-com` docs changes before further child-site work.
+5. Standardize `richardjoo-com` to the child-site doc standard when that operational docs work is in scope.
+6. If doc-cleanup scope expands, audit package READMEs and `docs/src/content/docs/` against the now-current canonical/orchestrator guidance.
 
 ## Resume Instructions For The Next AI
 
@@ -73,5 +79,6 @@ That lint failure is the main repo-level verification gap still open.
 2. Switch to the Node version in `.nvmrc` before running repo commands.
 3. If `origin/main` is behind `upstream/main`, sync the fork before any other substantive work.
 4. After the fork is current, update any affected child sites serially under the orchestrator docs and registry.
-5. Treat this folder as the current time-bound state layer; treat the canonical root/orchestrator docs as the source-of-truth layer.
-6. If you change canonical/orchestrator rules again, update those docs first and then add or refresh a dated worklog package rather than scattering status notes elsewhere.
+5. Before editing `richardjoo-com`, inspect its local worktree because it currently has uncommitted docs changes not captured in a child-site commit from this pass.
+6. Treat this folder as the current time-bound state layer; treat the canonical root/orchestrator docs as the source-of-truth layer.
+7. If you change canonical/orchestrator rules again, update those docs first and then add or refresh a dated worklog package rather than scattering status notes elsewhere.

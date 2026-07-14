@@ -33,3 +33,4 @@
 - `pnpm lint:quick` and `pnpm lint:json` currently panic inside `oxlint` under Node `22.22.2`.
 - `pnpm screenshots` is still not reliable because the harness expects `pnpm bootstrap` in template packages.
 - `richardjoo-com` is upgraded and verified on released `0.28.1` packages, but its docs are still only partially standardized relative to the child-site doc standard.
+- The local `richardjoo-com` checkout currently has uncommitted docs changes; inspect `git status` there before doing more child-site work or assuming the repo is clean.

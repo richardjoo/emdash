@@ -12,3 +12,4 @@
 | TOOL-001 | Resolve the current `oxlint` panic so `pnpm lint:quick` and `pnpm lint:json` return diagnostics normally | Open | TBD | TBD | Reproduced on `2026-07-14` under Node `22.22.2` after the sync and fresh build |
 | DOC-004 | Audit package READMEs and published docs-site pages for stale or conflicting operational guidance if scope expands | Open | TBD | TBD | This pass stayed focused on canonical/orchestrator docs and one child site |
 | SITE-003 | Standardize `richardjoo-com` to the child-site doc standard runbook/status file set | Open | TBD | TBD | `docs/orchestrator/CHILD_SITE_REGISTRY.md` still marks the site docs as partially standardized |
+| SITE-004 | Review the current uncommitted `richardjoo-com` docs changes before any further child-site edits | Open | TBD | TBD | Final check found local changes in `AGENTS.md`, `README.md`, `docs/cloudflare-site-runbook.md`, and `docs/handover/` that were not made in this pass |
