@@ -38,6 +38,7 @@ These are emergency-only exceptions and require an explicit orchestrator decisio
 ## Hard Rules
 
 - Child sites do not invent CMS/package behavior independently.
+- If `richardjoo/emdash` is behind `upstream/main`, syncing the fork is mandatory before any other substantive repo or child-site work.
 - Any package-contract change starts in single-agent mode.
 - Two-agent mode is forbidden from changing package dependencies, EmDash patches, or lockstep CMS config unless the orchestrator explicitly authorizes it.
 - Every active site-local patch must be tracked in the child-site registry with an explicit removal trigger.

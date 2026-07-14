@@ -2,7 +2,7 @@ This file provides guidance to agentic coding tools working in this repository.
 
 For human-facing contributor info (setup, repo layout, PR policy, changesets, i18n), see `CONTRIBUTING.md`. This file focuses on the patterns and gotchas an agent needs to write correct code.
 
-`CLAUDE.md` is a symlink to this file. `.opencode/skills` and `.claude/skills` are symlinks to `skills/`. Don't try to sync between them.
+`.claude/CLAUDE.md` is a symlink to this file and `.claude/skills` is a symlink to `../skills`. This checkout also has a local `.opencode/` tool directory, but no `.opencode/skills` symlink -- don't try to create or sync one as part of repo work.
 
 Cross-repo CMS orchestration governance lives under `docs/orchestrator/`. Read `docs/orchestrator/README.md` before doing work that spans this repo and child site repos.
 
@@ -20,9 +20,9 @@ Internal project handovers and work logs live under `docs/worklogs/`. When prese
 
 ## Workflow
 
-**CRITICAL: If this repository is being worked from a fork, check upstream before doing substantive work.** Run `git fetch upstream --prune` and compare your branch or `origin/main` against `upstream/main` first. If the fork is substantially behind, sync or explicitly account for that drift before editing code.
+**CRITICAL: If this repository is being worked from a fork, check upstream before doing substantive work.** Run `git fetch upstream --prune` and compare your branch or `origin/main` against `upstream/main` first. If `origin/main` is behind `upstream/main`, sync the fork before any other substantive work. After the fork is current, update any affected child sites serially under `docs/orchestrator/` governance.
 
-Run `pnpm lint:json | jq '.diagnostics | length'` before starting and confirm it's clean -- if it's failing after your edits, your changes caused it.
+Run `pnpm lint:json | jq '.diagnostics | length'` before starting and record the result. If it was clean before your edits and fails after, your changes caused it; if the baseline is already failing, treat that as an existing repo issue and note it in your handover.
 
 If repo commands fail before the workspace even loads, switch to the Node version pinned in `.nvmrc` first. Running under the wrong Node version can break `pnpm`/`oxlint` before you reach repo checks.
 
