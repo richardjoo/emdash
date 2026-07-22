@@ -33,5 +33,6 @@ Internal AI-facing project operations records. This directory is not published t
 
 ## Current Packages
 
+- [`2026-07-21-upstream-sync-and-doc-audit/`](2026-07-21-upstream-sync-and-doc-audit/README.md) -- upstream sync, full docs-audit cleanup, and post-sync verification handover package for the current repo state.
 - [`2026-07-14-fork-sync-and-child-site-upgrade/`](2026-07-14-fork-sync-and-child-site-upgrade/README.md) -- upstream-sync, child-site upgrade, and canonical-doc refresh handover package for the current orchestrator state.
 - [`2026-06-25-current-fork-doc-reconciliation/`](2026-06-25-current-fork-doc-reconciliation/README.md) -- canonical root-doc reconciliation and AI handover package for the current fork state.
