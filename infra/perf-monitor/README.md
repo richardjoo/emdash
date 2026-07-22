@@ -1,20 +1,22 @@
 # Emdash Perf Monitor
 
-Tracks cold start / TTFB of the emdash demo sites over time from multiple regions. Two sites are measured in parallel so the effect of Astro's experimental cache provider can be compared head-to-head:
+Tracks cold start / TTFB of the emdash demo sites over time from multiple regions. Four sites are measured in parallel so different storage/runtime strategies can be compared head-to-head:
 
 - `blog` -- `blog-demo.emdashcms.com` (baseline, catalog Astro)
 - `cache` -- `cache-demo.emdashcms.com` (prerelease Astro with `cacheCloudflare()` enabled)
+- `do` -- `do-demo.emdashcms.com` (Durable Objects SQL backend with read replicas)
+- `do-solo` -- `do-solo-demo.emdashcms.com` (Durable Objects SQL backend with a single primary)
 
 Each measurement row is tagged with a `site` column matching one of those ids.
 
 ## Architecture
 
 - **Coordinator Worker** (`emdash-perf-coordinator`) owns the D1 database, cron trigger, queue consumer, HTTP API, and frontend dashboard. Served at `https://perf.emdashcms.com`.
-- **4 Probe Workers** (`emdash-perf-probe-{use,euw,ape,aps}`) are placed near AWS regions via `placement.region`. They receive measurement requests from the coordinator via service bindings and run `fetch()` timing from their placed location.
+- **6 Probe Workers** (`emdash-perf-probe-{use,euw,ape,aps,sae,oce}`) are placed near AWS regions via `placement.region`. They receive measurement requests from the coordinator via service bindings and run `fetch()` timing from their placed location.
 - **D1 database** (`emdash_perf`) stores all measurements, tagged by `source`: `deploy` (queue-triggered, has SHA + PR) or `cron` (ambient baseline, untagged).
 - **Cloudflare Queue** (`emdash-perf-deploy-events`) subscribes to `cf.workersBuilds.worker.build.succeeded` events. The coordinator consumes these, filters for the baseline demo Worker, resolves the PR via the GitHub API, and runs a measurement against every registered site. This is the primary attribution path; see `src/routes.ts` for the site registry.
 
-All five Workers are built from this directory by the Cloudflare Vite plugin -- the coordinator entry is `src/index.ts` and the four probes are defined as `auxiliaryWorkers` in `vite.config.ts`.
+All seven Workers are built from this directory by the Cloudflare Vite plugin -- the coordinator entry is `src/index.ts` and the six probes are defined as `auxiliaryWorkers` in `vite.config.ts`.
 
 ## Measurement triggers
 
@@ -62,7 +64,7 @@ pnpm db:migrations:apply  # any incremental migrations on top
 wrangler queues create emdash-perf-deploy-events
 wrangler queues create emdash-perf-deploy-events-dlq
 
-# 3. Build and deploy all 5 Workers
+# 3. Build and deploy all 7 Workers
 pnpm deploy
 
 # 4. Subscribe the queue to Workers Builds events.
@@ -81,12 +83,12 @@ No secrets required. PR lookup hits the public GitHub API unauthenticated
 
 ## Deploy order
 
-The coordinator's service bindings require the probes to exist first. `pnpm deploy` handles this: it builds, deploys all 4 probes, then deploys the coordinator.
+The coordinator's service bindings require the probes to exist first. `pnpm deploy` handles this: it builds, deploys all 6 probes, then deploys the coordinator.
 
 ## Dev
 
 ```bash
-pnpm dev  # Vite dev server, all 5 Workers via Miniflare
+pnpm dev  # Vite dev server, coordinator + all 6 probes via Miniflare
 ```
 
 Open `http://localhost:5173` for the dashboard. API is at `/api/*`. Queue events can't be exercised locally without manual message publishing -- rely on the live environment or the next cron tick to verify the measurement path.

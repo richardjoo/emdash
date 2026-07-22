@@ -14,16 +14,19 @@ End-to-end test plugin for the EmDash marketplace publish and audit pipeline.
 Bundle and publish to a marketplace instance:
 
 ```bash
-emdash plugin bundle --dir packages/plugins/marketplace-test
-emdash plugin publish dist/marketplace-test-0.1.0.tar.gz --registry https://emdash-marketplace.cto.cloudflare.dev
+pnpm build
+emdash-plugin bundle
+# upload dist/plugin-marketplace-test-0.1.2.tar.gz somewhere public
+emdash-plugin publish --url https://example.com/plugin-marketplace-test-0.1.2.tar.gz
 ```
 
 ## Testing
 
 This plugin is designed to exercise every step of the marketplace pipeline:
 
-1. **Bundle** — `emdash plugin bundle` builds `backend.js` from `sandbox-entry.ts`
-2. **Upload** — tarball includes manifest, backend, icon, screenshot, README
-3. **Code audit** — Workers AI analyzes `backend.js` (should pass — clean code)
-4. **Image audit** — Workers AI analyzes `icon.png` and `screenshots/` (should pass)
-5. **Status resolution** — enforcement mode determines final status
+1. **Build** — `pnpm build` produces `dist/plugin.mjs`, `dist/manifest.json`, and `dist/index.mjs`
+2. **Bundle** — `emdash-plugin bundle` packs the built artifacts plus icon, screenshot, and README
+3. **Upload** — the hosted tarball URL is published into the registry release record
+4. **Code audit** — Workers AI analyzes the bundled plugin runtime (should pass — clean code)
+5. **Image audit** — Workers AI analyzes `icon.png` and `screenshots/` (should pass)
+6. **Status resolution** — enforcement mode determines final status

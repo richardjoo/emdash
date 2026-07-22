@@ -194,7 +194,7 @@ import { generatePreviewToken } from "emdash";
 
 const token = await generatePreviewToken({
 	contentId: "posts:01HXK5MZSN...",
-	secret: process.env.EMDASH_ADMIN_SECRET,
+	secret: process.env.EMDASH_PREVIEW_SECRET,
 	expiresIn: 3600, // 1 hour
 });
 ```
@@ -208,7 +208,7 @@ import { verifyPreviewToken } from "emdash";
 
 const result = await verifyPreviewToken({
 	token,
-	secret: process.env.EMDASH_ADMIN_SECRET,
+	secret: process.env.EMDASH_PREVIEW_SECRET,
 });
 
 if (result.valid) {

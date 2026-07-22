@@ -285,35 +285,40 @@ A successful upload returns the stored media item:
 
 ```json
 {
-	"success": true,
 	"data": {
 		"item": {
 			"id": "01ABC123",
 			"filename": "hero-image.jpg",
-			"mime_type": "image/jpeg",
-			"storage_key": "media/abc123/hero-image.jpg",
+			"mimeType": "image/jpeg",
+			"storageKey": "01ABC123.jpg",
+			"status": "ready",
 			"width": 1200,
-			"height": 800
+			"height": 800,
+			"url": "/_emdash/api/media/file/01ABC123.jpg"
 		}
 	}
 }
 ```
 
+When storage supports signed uploads, request a direct upload URL from
+`POST /_emdash/api/media/upload-url`, upload the file to storage, then confirm it with
+`POST /_emdash/api/media/:id/confirm`. The admin UI handles this automatically.
+
 ### List Media
 
-The following request lists media under a prefix:
+The following request lists media items filtered by MIME type:
 
-```bash
-GET /_emdash/api/media?prefix=images/&limit=20
+```http
+GET /_emdash/api/media?mimeType=image/jpeg&limit=20
 Authorization: Bearer YOUR_API_TOKEN
 ```
 
 ### Delete Media
 
-The following request deletes a stored file:
+The following request deletes a media item by id:
 
-```bash
-DELETE /_emdash/api/media/images/hero.jpg
+```http
+DELETE /_emdash/api/media/01ABC123
 Authorization: Bearer YOUR_API_TOKEN
 ```
 

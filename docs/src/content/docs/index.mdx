@@ -20,7 +20,7 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 
 <CardGrid stagger>
 	<Card title="Astro-Native" icon="astro">
-		Built on Astro 6's Live Content Collections. Content updates appear instantly at runtime.
+		Built on Astro's Live Content Collections. Content updates appear instantly at runtime.
 	</Card>
 	<Card title="Type-Safe" icon="setting">
 		Generate TypeScript types from your content model for full type safety and
@@ -37,7 +37,9 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 The following commands create a new EmDash site and start the development server. The admin UI is then available at `http://localhost:4321/_emdash/admin`.
 
 ```bash
-npm create astro@latest -- --template @emdash-cms/template-blog
+npm create emdash@latest
+cd my-emdash-site
+npm install
 npm run dev
 ```
 

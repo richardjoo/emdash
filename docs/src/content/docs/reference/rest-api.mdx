@@ -9,13 +9,20 @@ EmDash exposes a REST API at `/_emdash/api/` for content management, media uploa
 
 ## Authentication
 
-API requests require authentication via a Bearer token in the `Authorization` header:
+The API accepts either:
+
+- a session cookie (`emdash_session`) from the admin UI or another same-site client
+- a Bearer token in the `Authorization` header
+
+Bearer-token requests look like this:
 
 ```http
 Authorization: Bearer <token>
 ```
 
-Generate tokens through the admin interface or programmatically.
+State-changing requests (`POST`, `PUT`, `PATCH`, `DELETE`) that rely on the session cookie must
+also include `X-EmDash-Request: 1` for CSRF protection. Bearer-token requests are exempt. The
+admin UI and official EmDash clients add this header automatically.
 
 ## Response format
 
@@ -23,7 +30,6 @@ All responses follow a consistent format. A successful response wraps the result
 
 ```json
 {
-  "success": true,
   "data": { ... }
 }
 ```
@@ -32,7 +38,6 @@ An error response includes a code, message, and optional details:
 
 ```json
 {
-  "success": false,
   "error": {
     "code": "ERROR_CODE",
     "message": "Human-readable message",
@@ -64,7 +69,6 @@ GET /_emdash/api/content/:collection
 
 ```json
 {
-  "success": true,
   "data": {
     "items": [
       {
@@ -92,7 +96,6 @@ GET /_emdash/api/content/:collection/:id
 
 ```json
 {
-  "success": true,
   "data": {
     "item": {
       "id": "01HXK5MZSN...",
@@ -131,9 +134,9 @@ Content-Type: application/json
 
 ```json
 {
-  "success": true,
   "data": {
-    "item": { ... }
+		"item": { ... },
+		"_rev": "opaque-revision-token"
   }
 }
 ```
@@ -152,9 +155,11 @@ Content-Type: application/json
 	"data": {
 		"title": "Updated Title"
 	},
-	"status": "published"
+	"_rev": "opaque-revision-token"
 }
 ```
+
+Publishing is a separate action. Use the publish endpoint to move a draft live.
 
 ### Delete Content
 
@@ -166,9 +171,9 @@ DELETE /_emdash/api/content/:collection/:id
 
 ```json
 {
-	"success": true,
 	"data": {
-		"success": true
+		"deleted": true,
+		"id": "01HXK5MZSN..."
 	}
 }
 ```
@@ -193,7 +198,6 @@ GET /_emdash/api/media
 
 ```json
 {
-	"success": true,
 	"data": {
 		"items": [
 			{
@@ -222,26 +226,79 @@ GET /_emdash/api/media/:id
 
 ```http
 POST /_emdash/api/media
-Content-Type: application/json
+Content-Type: multipart/form-data
 ```
 
-#### Request Body
+#### Multipart fields
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `file` | file | Required upload payload |
+| `fieldId` | string | Optional field-specific MIME allowlist selector |
+| `width` / `height` | number | Optional client-known image dimensions |
+| `thumbnail` | file | Optional small preview image for placeholder generation |
+
+#### Response
 
 ```json
 {
-	"filename": "photo.jpg",
-	"mimeType": "image/jpeg",
-	"size": 102400,
-	"width": 1920,
-	"height": 1080,
-	"storageKey": "uploads/photo.jpg"
+	"data": {
+		"item": {
+			"id": "01HXK5MZSN...",
+			"filename": "photo.jpg",
+			"mimeType": "image/jpeg",
+			"storageKey": "01HXK5MZSN.jpg",
+			"status": "ready",
+			"width": 1920,
+			"height": 1080,
+			"url": "/_emdash/api/media/file/01HXK5MZSN.jpg"
+		}
+	}
 }
 ```
 
-<Aside>
-	This endpoint records media metadata after upload. Use the upload endpoint or signed URLs to
-	upload the actual file.
-</Aside>
+### Create Signed Upload URL
+
+```http
+POST /_emdash/api/media/upload-url
+Content-Type: application/json
+
+{
+  "filename": "photo.jpg",
+  "contentType": "image/jpeg",
+  "size": 102400
+}
+```
+
+This returns a pending media record plus the signed upload details:
+
+```json
+{
+	"data": {
+		"uploadUrl": "https://storage.example.com/...",
+		"method": "PUT",
+		"headers": {
+			"content-type": "image/jpeg"
+		},
+		"mediaId": "01HXK5MZSN...",
+		"storageKey": "01HXK5MZSN.jpg",
+		"expiresAt": "2026-07-21T12:00:00.000Z"
+	}
+}
+```
+
+### Confirm Signed Upload
+
+```http
+POST /_emdash/api/media/:id/confirm
+Content-Type: application/json
+
+{
+  "size": 102400,
+  "width": 1920,
+  "height": 1080
+}
+```
 
 ### Update Media
 
@@ -380,7 +437,6 @@ GET /_emdash/api/content/:collection/:entryId/revisions
 
 ```json
 {
-  "success": true,
   "data": {
     "items": [
       {
@@ -422,7 +478,6 @@ GET /_emdash/api/schema/collections
 
 ```json
 {
-	"success": true,
 	"data": {
 		"items": [
 			{
@@ -626,7 +681,6 @@ GET /_emdash/api/search?q=hello+world
 
 ```json
 {
-  "success": true,
   "data": {
     "items": [
       {
@@ -656,9 +710,14 @@ Returns prefix-matched titles for autocomplete.
 
 ```http
 POST /_emdash/api/search/rebuild
+Content-Type: application/json
+
+{
+  "collection": "posts"
+}
 ```
 
-Rebuild FTS index for all or specific collections.
+Rebuilds the FTS index for a single collection.
 
 ### Search Stats
 
@@ -725,7 +784,7 @@ POST /_emdash/api/settings
 Content-Type: application/json
 
 {
-  "siteTitle": "My Site",
+  "title": "My Site",
   "tagline": "A great site",
   "postsPerPage": 10
 }

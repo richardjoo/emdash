@@ -254,8 +254,8 @@ Delete content from the edit screen or content list:
 3. Confirm the deletion
 
 <Aside type="caution">
-	Deleted content is permanently removed and cannot be recovered. Consider archiving instead if you
-	might need the content later.
+	Deleting content moves it to the trash first. You can restore it later, or permanently delete it
+	from the trash when you no longer need it.
 </Aside>
 
 ## Content API
@@ -266,40 +266,57 @@ For programmatic access, use the EmDash admin API.
 
 The following request creates a draft post:
 
-```bash
+```http
 POST /_emdash/api/content/posts
-Content-Type: application/json
 Authorization: Bearer YOUR_API_TOKEN
+Content-Type: application/json
 
 {
-  "title": "My New Post",
-  "slug": "my-new-post",
-  "content": "<p>Post content here</p>",
-  "status": "draft"
+	"data": {
+		"title": "My New Post"
+	},
+	"slug": "my-new-post",
+	"status": "draft"
 }
 ```
 
 ### Update Content
 
-The following request updates an existing post and publishes it:
+The following request updates an existing post:
 
-```bash
+```http
 PUT /_emdash/api/content/posts/my-new-post
-Content-Type: application/json
 Authorization: Bearer YOUR_API_TOKEN
+Content-Type: application/json
 
 {
-  "title": "Updated Title",
-  "status": "published"
+	"data": {
+		"title": "Updated Title"
+	},
+	"_rev": "opaque-revision-token"
 }
 ```
 
 ### Delete Content
 
-The following request permanently deletes a post:
+The following request soft-deletes a post and moves it to the trash:
 
-```bash
+```http
 DELETE /_emdash/api/content/posts/my-new-post
+Authorization: Bearer YOUR_API_TOKEN
+```
+
+Restore a trashed post:
+
+```http
+POST /_emdash/api/content/posts/my-new-post/restore
+Authorization: Bearer YOUR_API_TOKEN
+```
+
+Permanently delete a trashed post:
+
+```http
+DELETE /_emdash/api/content/posts/my-new-post/permanent
 Authorization: Bearer YOUR_API_TOKEN
 ```
 

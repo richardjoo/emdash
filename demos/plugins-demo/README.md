@@ -52,15 +52,15 @@ Exercises all v2 plugin APIs for testing.
 # Install dependencies
 pnpm install
 
-# Seed sample content
-pnpm seed
-
 # Start development server
 pnpm dev
 
 # Open browser
 open http://localhost:4321
 ```
+
+When the demo starts against an empty database, EmDash runs migrations automatically and applies
+its built-in starter seed on first request.
 
 ## Testing Plugin Hooks
 

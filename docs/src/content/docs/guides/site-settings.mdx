@@ -251,22 +251,24 @@ Fetch settings programmatically with a GET request:
 GET /_emdash/api/settings
 ```
 
-The response is a JSON object of the settings:
+The response wraps the settings object in `data`:
 
 ```json
 {
-	"title": "My EmDash Site",
-	"tagline": "A modern CMS",
-	"logo": {
-		"mediaId": "med_123",
-		"url": "/_emdash/api/media/file/abc123"
-	},
-	"postsPerPage": 10,
-	"dateFormat": "MMMM d, yyyy",
-	"timezone": "America/New_York",
-	"social": {
-		"twitter": "@handle",
-		"github": "username"
+	"data": {
+		"title": "My EmDash Site",
+		"tagline": "A modern CMS",
+		"logo": {
+			"mediaId": "med_123",
+			"url": "/_emdash/api/media/file/abc123"
+		},
+		"postsPerPage": 10,
+		"dateFormat": "MMMM d, yyyy",
+		"timezone": "America/New_York",
+		"social": {
+			"twitter": "@handle",
+			"github": "username"
+		}
 	}
 }
 ```
