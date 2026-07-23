@@ -131,7 +131,7 @@ export async function bundlePlugin(options: BundleOptions): Promise<BundleResult
 	// ── 1. Build dist/ via the shared pipeline ──
 	let build: BuildResult;
 	try {
-		build = await buildPlugin({ dir: pluginDir, outDir, logger: log });
+		build = await buildPlugin({ dir: pluginDir, outDir, logger: log, emitTypes: false });
 	} catch (error) {
 		if (error instanceof BuildError) {
 			throw new BundleError(error.code, error.message);

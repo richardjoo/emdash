@@ -499,11 +499,12 @@ export interface BuildRuntimeContext {
 	outDir: string;
 	tmpDir: string;
 	build: typeof import("tsdown").build;
+	emitTypes: boolean;
 }
 
 export interface RuntimeFiles {
 	runtime: string;
-	runtimeTypes: string;
+	runtimeTypes: string | undefined;
 }
 
 /**
@@ -518,7 +519,7 @@ export interface RuntimeFiles {
  * `emdash` at runtime.
  */
 export async function buildRuntime(ctx: BuildRuntimeContext): Promise<RuntimeFiles> {
-	const { entries, outDir, tmpDir, build } = ctx;
+	const { entries, outDir, tmpDir, build, emitTypes } = ctx;
 
 	const runtimeOutDir = join(tmpDir, "runtime");
 
@@ -529,7 +530,7 @@ export async function buildRuntime(ctx: BuildRuntimeContext): Promise<RuntimeFil
 			format: "esm",
 			outExtensions: () => ({ js: ".mjs", dts: ".d.mts" }),
 			outDir: runtimeOutDir,
-			dts: true,
+			dts: emitTypes,
 			platform: "neutral",
 			external: [],
 			minify: true,
@@ -554,10 +555,13 @@ export async function buildRuntime(ctx: BuildRuntimeContext): Promise<RuntimeFil
 	const runtime = join(outDir, "plugin.mjs");
 	await copyFile(builtJs, runtime);
 
-	const builtDts = join(runtimeOutDir, "plugin.d.mts");
-	const runtimeTypes = join(outDir, "plugin.d.mts");
-	if (await fileExists(builtDts)) {
-		await copyFile(builtDts, runtimeTypes);
+	let runtimeTypes: string | undefined;
+	if (emitTypes) {
+		const builtDts = join(runtimeOutDir, "plugin.d.mts");
+		runtimeTypes = join(outDir, "plugin.d.mts");
+		if (await fileExists(builtDts)) {
+			await copyFile(builtDts, runtimeTypes);
+		}
 	}
 
 	return { runtime, runtimeTypes };

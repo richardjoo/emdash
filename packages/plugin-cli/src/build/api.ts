@@ -78,6 +78,8 @@ export interface BuildOptions {
 	outDir?: string;
 	/** Optional progress reporter. */
 	logger?: BuildLogger;
+	/** Emit declaration files for build artifacts. Defaults to true. */
+	emitTypes?: boolean;
 }
 
 export interface BuildResult {
@@ -102,7 +104,7 @@ export interface BuildResult {
 	/** Absolute paths of the files produced. */
 	files: {
 		runtime: string;
-		runtimeTypes: string;
+		runtimeTypes: string | undefined;
 		manifestJson: string;
 		/** Only set when `package.json` exists. */
 		descriptor: string | undefined;
@@ -119,6 +121,7 @@ export async function buildPlugin(options: BuildOptions): Promise<BuildResult> {
 	const log = options.logger ?? {};
 	const pluginDir = resolve(options.dir);
 	const outDir = resolve(pluginDir, options.outDir ?? "dist");
+	const emitTypes = options.emitTypes ?? true;
 
 	log.start?.("Building plugin...");
 
@@ -147,6 +150,7 @@ export async function buildPlugin(options: BuildOptions): Promise<BuildResult> {
 				outDir,
 				tmpDir,
 				build,
+				emitTypes,
 			}),
 		);
 		log.success?.("Built plugin.mjs");

@@ -85,14 +85,43 @@ export class AdminPage {
 	async goto(path = "/"): Promise<void> {
 		const url = path === "/" ? this.baseUrl : `${this.baseUrl}${path}`;
 		await this.page.goto(url);
+
+		// Cold admin-route compilation can leave the shell loader visible for several
+		// seconds on the first hit. Wait for either hydration or network-idle before
+		// callers assert on page-specific content.
+		await Promise.race([
+			this.page.waitForLoadState("networkidle").catch(() => {}),
+			this.waitForHydration().catch(() => {}),
+		]);
+
+		const loaderVisible = await this.page.getByText("Loading EmDash...").isVisible().catch(() => false);
+		if (loaderVisible) {
+			await this.waitForHydration();
+		}
+
+		await this.dismissViteOverlay();
 	}
 
 	/**
 	 * Wait for React hydration to complete.
-	 * Astro removes the `ssr` attribute from `<astro-island>` after hydration.
+	 * The admin shell removes `#emdash-boot-loader` on first successful React mount.
+	 * Fall back to the Astro island being attached for routes that don't render the
+	 * loader in the same way.
 	 */
 	async waitForHydration(): Promise<void> {
-		await this.page.waitForSelector("astro-island:not([ssr])", { timeout: 15000 });
+		const hasBootLoader = await this.page.locator("#emdash-boot-loader").count();
+		if (hasBootLoader > 0) {
+			await this.page.waitForSelector("#emdash-boot-loader", {
+				state: "detached",
+				timeout: 30000,
+			});
+			return;
+		}
+
+		await this.page.waitForSelector("astro-island", {
+			state: "attached",
+			timeout: 30000,
+		});
 	}
 
 	/**
@@ -109,7 +138,7 @@ export class AdminPage {
 			try {
 				// Wait for both sidebar and hydration signal
 				await this.page.waitForSelector('aside[aria-label="Admin navigation"]', {
-					timeout: 15000,
+					timeout: 30000,
 				});
 				await this.waitForHydration();
 				lastError = undefined;

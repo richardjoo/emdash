@@ -51,6 +51,8 @@ const PORT = 4444;
 const MARKETPLACE_PORT = 4445;
 const SERVER_INFO_PATH = join(tmpdir(), "emdash-pw-server.json");
 
+const DEV_SERVER_STATUS_REGEX = /http:\/\/localhost:(\d+) \(pid (\d+),/;
+
 // Regex patterns
 const COOKIE_VALUE_PATTERN = /^([^;]+)/;
 
@@ -86,11 +88,17 @@ async function ensureFixtureDepsBuilt(): Promise<void> {
  * cold start until it finishes pre-bundling -- pronounced under the Cloudflare
  * (workerd) runner, where the first requests fail with optimize-deps errors.
  */
-async function waitForOk(url: string, timeoutMs: number, token?: string): Promise<Response> {
+async function waitForOk(
+	url: string,
+	timeoutMs: number,
+	token?: string,
+	extraHeaders?: Record<string, string>,
+): Promise<Response> {
 	const start = Date.now();
 	let lastStatus = 0;
 	let lastBody = "";
-	const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+	const headers: Record<string, string> = { ...extraHeaders };
+	if (token) headers.Authorization = `Bearer ${token}`;
 	while (Date.now() - start < timeoutMs) {
 		try {
 			const res = await fetch(url, { headers, signal: AbortSignal.timeout(10_000) });
@@ -105,6 +113,135 @@ async function waitForOk(url: string, timeoutMs: number, token?: string): Promis
 	throw new Error(
 		`${url} did not return ok within ${timeoutMs}ms (last ${lastStatus}): ${lastBody.slice(0, 300)}`,
 	);
+}
+
+async function freePort(port: number): Promise<void> {
+	const start = Date.now();
+	while (Date.now() - start < 10_000) {
+		let stdout = "";
+		try {
+			({ stdout } = await execAsync("ss", ["-ltnp", `( sport = :${port} )`], {
+				timeout: 5_000,
+			}));
+		} catch {
+			return;
+		}
+
+		const pids = Array.from(stdout.matchAll(/pid=(\d+)/g), (match) => Number(match[1]));
+		if (pids.length === 0) return;
+
+		for (const pid of pids) {
+			try {
+				process.kill(pid, "SIGTERM");
+			} catch {
+				// Best-effort cleanup only.
+			}
+		}
+
+		await new Promise((r) => setTimeout(r, 500));
+
+		for (const pid of pids) {
+			try {
+				process.kill(pid, 0);
+				process.kill(pid, "SIGKILL");
+			} catch {
+				// Already gone.
+			}
+		}
+
+		await new Promise((r) => setTimeout(r, 500));
+	}
+}
+
+async function waitForManagedDevServer(
+	astroBin: string,
+	cwd: string,
+	expectedPort: number,
+	timeoutMs: number,
+): Promise<{ pid: number }> {
+	const start = Date.now();
+	while (Date.now() - start < timeoutMs) {
+		try {
+			const { stdout } = await execAsync(astroBin, ["dev", "status"], {
+				cwd,
+				timeout: 10_000,
+			});
+			const match = stdout.match(DEV_SERVER_STATUS_REGEX);
+			if (match) {
+				const port = Number(match[1]);
+				const pid = Number(match[2]);
+				if (port !== expectedPort) {
+					throw new Error(
+						`Astro dev server started on unexpected port ${port} (expected ${expectedPort})`,
+					);
+				}
+				return { pid };
+			}
+		} catch (error) {
+			if (error instanceof Error && error.message.includes("unexpected port")) {
+				throw error;
+			}
+		}
+		await new Promise((r) => setTimeout(r, 1000));
+	}
+
+	throw new Error(`Astro dev server did not report ready status within ${timeoutMs}ms`);
+}
+
+async function warmAdminSpa(baseUrl: string, sessionCookie: string): Promise<void> {
+	const { chromium } = await import("@playwright/test");
+	const browser = await chromium.launch({ headless: true });
+
+	try {
+		if (sessionCookie) {
+			const context = await browser.newContext();
+			const [cookieName, cookieValue] = sessionCookie.split("=", 2);
+			await context.addCookies([
+				{
+					name: cookieName,
+					value: cookieValue ?? "",
+					url: baseUrl,
+				},
+			]);
+			const shellPage = await context.newPage();
+			await shellPage.goto(`${baseUrl}/_emdash/admin/`, {
+				waitUntil: "load",
+				timeout: 120_000,
+			});
+			await shellPage.waitForSelector('aside[aria-label="Admin navigation"]', {
+				timeout: 120_000,
+			});
+
+			for (const path of [
+				"/_emdash/admin/content/posts",
+				"/_emdash/admin/content/posts/new",
+				"/_emdash/admin/media",
+				"/_emdash/admin/users",
+				"/_emdash/admin/settings",
+				"/_emdash/admin/settings/api-tokens",
+			]) {
+				await shellPage.goto(`${baseUrl}${path}`, {
+					waitUntil: "load",
+					timeout: 120_000,
+				});
+				await shellPage.waitForSelector('aside[aria-label="Admin navigation"]', {
+					timeout: 120_000,
+				});
+			}
+
+			await context.close();
+		}
+
+		const loginPage = await browser.newPage();
+		await loginPage.goto(`${baseUrl}/_emdash/admin/login`, {
+			waitUntil: "load",
+			timeout: 60_000,
+		});
+		await loginPage.locator("h1").filter({ hasText: "Sign in" }).waitFor({ timeout: 60_000 });
+		await loginPage.close();
+	} finally {
+		await browser.close();
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -299,6 +436,27 @@ export default async function globalSetup(): Promise<void> {
 
 	// 2. Start dev server (with marketplace URL injected via env)
 	const astroBin = join(fixtureNodeModules, ".bin", "astro");
+
+	// Astro can keep a managed dev server process alive after an interrupted test
+	// run. Stop any prior fixture server first so the new run doesn't attach to a
+	// stale daemon on a different port.
+	try {
+		await execAsync(astroBin, ["dev", "stop"], {
+			cwd: workDir,
+			env: process.env,
+			timeout: 30_000,
+		});
+	} catch {
+		// No managed dev server was running for this fixture.
+	}
+
+	// Old foreground/background runs can still leave listeners behind even after
+	// the managed dev server state is gone. Clear the fixed test ports so Astro
+	// doesn't silently fall back to a different port that the rest of the harness
+	// doesn't know about.
+	await freePort(PORT);
+	await freePort(PORT + 2);
+
 	const server = spawn(astroBin, ["dev", "--port", String(PORT)], {
 		cwd: workDir,
 		env: {
@@ -321,6 +479,7 @@ export default async function globalSetup(): Promise<void> {
 		// + create a PAT. The gate polls until dev-bypass actually returns 200,
 		// absorbing the optimizer's cold-start failures.
 		console.log("[pw] Waiting for server + setup...");
+		const managedServer = await waitForManagedDevServer(astroBin, workDir, PORT, 60_000);
 		const setupRes = await waitForOk(`${baseUrl}/_emdash/api/setup/dev-bypass?token=1`, 120_000);
 		const setupJson: { data: { user: { id: string }; token?: string } } = await setupRes.json();
 		const setupData = setupJson.data;
@@ -364,9 +523,14 @@ export default async function globalSetup(): Promise<void> {
 			await waitForOk(`${baseUrl}${path}`, 60_000, token);
 		}
 
+		// 5d. Warm the admin SPA in a real browser. Plain HTTP 200s are not enough:
+		// cold Vite compilation can still leave the boot loader visible until the
+		// client graph fully evaluates once.
+		await warmAdminSpa(baseUrl, sessionCookie);
+
 		// 6. Write server info
 		const info = {
-			pid: server.pid!,
+			pid: managedServer.pid,
 			workDir,
 			tempDataDir,
 			baseUrl,
