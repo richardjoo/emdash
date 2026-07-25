@@ -1,0 +1,8 @@
+# TODO
+
+| ID | Item | Status | Owner | Due date | Notes |
+| --- | --- | --- | --- | --- | --- |
+| SITE-001 | Upgrade `richardjoo-com` to released `0.30.0` packages after the orchestrator sync | Completed | OpenCode | 2026-07-24 | Local package alignment and verification completed |
+| SITE-002 | Commit and push the child-site package upgrade if/when requested | Open | TBD | TBD | This pass intentionally stopped short of child-site git commits/pushes |
+| SITE-003 | Reconcile the child site's unrelated local docs changes before committing anything in that repo | Open | TBD | TBD | Pre-existing local edits remain in `AGENTS.md`, `README.md`, `docs/cloudflare-site-runbook.md`, and `docs/handover/` |
+| SITE-004 | Resume site-local operational backlog from the child handover package | Open | TBD | TBD | Email provider setup remains the next critical task in the child-site handover docs |
