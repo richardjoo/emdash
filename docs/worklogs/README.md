@@ -33,6 +33,7 @@ Internal AI-facing project operations records. This directory is not published t
 
 ## Current Packages
 
+- [`2026-07-30-upstream-resync-before-email/`](2026-07-30-upstream-resync-before-email/README.md) -- sync-checkpoint package confirming local `main` is current with `upstream/main` again before resuming child-site email work.
 - [`2026-07-24-richardjoo-com-upgrade/`](2026-07-24-richardjoo-com-upgrade/README.md) -- child-site follow-up package for upgrading `richardjoo-com` to released `0.30.0` packages after the upstream sync.
 - [`2026-07-23-post-sync-regression-fixes/`](2026-07-23-post-sync-regression-fixes/README.md) -- post-sync regression fixes for OAuth env resolution, plugin bundling performance, and Playwright admin startup, plus broader confidence-pass results.
 - [`2026-07-21-upstream-sync-and-doc-audit/`](2026-07-21-upstream-sync-and-doc-audit/README.md) -- upstream sync, full docs-audit cleanup, and post-sync verification handover package for the current repo state.
