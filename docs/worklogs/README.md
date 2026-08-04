@@ -33,6 +33,7 @@ Internal AI-facing project operations records. This directory is not published t
 
 ## Current Packages
 
+- [`2026-07-30-richardjoo-com-email-delivery-confirmed/`](2026-07-30-richardjoo-com-email-delivery-confirmed/README.md) -- follow-up package recording the final notification-target change and successful live test delivery for `richardjoo-com`.
 - [`2026-07-30-richardjoo-com-email-config/`](2026-07-30-richardjoo-com-email-config/README.md) -- child-site email-provider configuration package for `richardjoo-com`, including the move to released `0.31.1` packages and current delivery-status findings.
 - [`2026-07-30-upstream-resync-before-email/`](2026-07-30-upstream-resync-before-email/README.md) -- sync-checkpoint package confirming local `main` is current with `upstream/main` again before resuming child-site email work.
 - [`2026-07-24-richardjoo-com-upgrade/`](2026-07-24-richardjoo-com-upgrade/README.md) -- child-site follow-up package for upgrading `richardjoo-com` to released `0.30.0` packages after the upstream sync.
