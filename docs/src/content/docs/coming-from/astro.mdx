@@ -340,9 +340,9 @@ export default definePlugin({
 
 ## Server Rendering
 
-EmDash sites run in SSR mode, so content is served at runtime and changes appear immediately.
+EmDash sites run in SSR mode by default, so content is served at runtime and changes appear immediately.
 
-For static pages with `getStaticPaths`, content is fetched at build time:
+For intentionally static pages with `getStaticPaths`, content is fetched at build time and stays frozen until the next rebuild:
 
 ```astro title="src/pages/posts/[slug].astro"
 ---
@@ -363,7 +363,7 @@ const { entry: post } = await getEmDashEntry("posts", slug);
 ---
 ```
 
-For dynamic pages, set `prerender = false` to fetch content on each request:
+For dynamic CMS pages, set `prerender = false` to fetch content on each request:
 
 ```astro title="src/pages/posts/[slug].astro"
 ---
@@ -385,8 +385,8 @@ if (!post) {
 ```
 
 <Aside type="tip">
-	Use server rendering for frequently updated content. Use static generation for content that
-	changes rarely and benefits from CDN caching.
+	Use server rendering for starter themes, reusable templates, and frequently updated content. Use
+	static generation only for content that changes rarely and benefits from rebuild-time output.
 </Aside>
 
 ## Next Steps

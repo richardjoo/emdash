@@ -419,7 +419,10 @@ This is the [two-configuration pattern](https://developers.cloudflare.com/hyperd
 </Aside>
 
 <Aside>
-	**Sandboxed plugins are D1-only.** The sandbox plugin bridge talks to a D1 binding directly, independent of the configured adapter, so sandboxed plugins aren't available on a Hyperdrive deployment.
+	**The Cloudflare sandbox runner is D1-only.** Its plugin bridge talks to a D1 binding directly,
+	independent of the configured adapter, so marketplace/sandboxed plugins are not available on a
+	Hyperdrive-backed Cloudflare deployment. Node.js deployments can use the workerd sandbox runner
+	against their configured database.
 </Aside>
 
 #### Optional: use a separate cached role

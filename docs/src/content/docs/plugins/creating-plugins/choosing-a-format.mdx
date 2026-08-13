@@ -67,7 +67,7 @@ If you're not sure, go sandboxed. You can always migrate to native later — but
 
 The sandbox itself is pluggable. EmDash exposes a `sandboxRunner` config option and the runner decides how plugin code is isolated — there's nothing Cloudflare-specific in the plugin format itself.
 
-The runner most sites use today is `sandbox()` from `@emdash-cms/cloudflare`, which uses Cloudflare Workers' [Dynamic Worker Loader](https://developers.cloudflare.com/workers/runtime-apis/bindings/worker-loader/). Worker Loader caches the V8 isolate per plugin id so the isolate cold-start cost is only paid once; the runner constructs a fresh worker stub and bridge bindings on each invocation, since stubs and bindings are tied to the calling request's I/O context. Runners for other platforms (Node.js via workerd, and potentially Deno) are in development.
+The runner most sites use today is `sandbox()` from `@emdash-cms/cloudflare`, which uses Cloudflare Workers' [Dynamic Worker Loader](https://developers.cloudflare.com/workers/runtime-apis/bindings/worker-loader/) and requires a D1 database binding for bridge operations. Worker Loader caches the V8 isolate per plugin id so the isolate cold-start cost is only paid once; the runner constructs a fresh worker stub and bridge bindings on each invocation, since stubs and bindings are tied to the calling request's I/O context. On Node.js, use `@emdash-cms/sandbox-workerd`, which runs sandboxed plugins through workerd against the configured database. Runners for other platforms are in development.
 
 If no runner is configured, or if the configured runner reports as unavailable on the current platform, plugins listed under `sandboxed: []` are skipped at startup with a debug-level log.
 

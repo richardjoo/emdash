@@ -35,7 +35,7 @@ To install marketplace plugins, your site needs:
    });
    ```
 
-   On **Cloudflare Workers**, sandboxing uses the Dynamic Worker Loader API (no additional setup needed). On **Node.js**, install the workerd sandbox runner:
+   On **Cloudflare Workers**, sandboxing uses the Dynamic Worker Loader API and requires a D1 database binding for sandbox bridge operations. On **Node.js**, install the workerd sandbox runner:
 
    ```bash
    npm install @emdash-cms/sandbox-workerd

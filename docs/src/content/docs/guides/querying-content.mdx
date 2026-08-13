@@ -310,11 +310,11 @@ const { entry: post } = await getEmDashEntry<Post>("posts", "my-post");
 
 ## Static vs. Server Rendering
 
-EmDash content works with both static and server-rendered pages.
+EmDash content works with both static and server-rendered pages. Use static generation only when you intentionally want content frozen at build time. Use server rendering for starter themes, reusable templates, and sites where admin edits should appear immediately.
 
 ### Static (Prerendered)
 
-For static pages, use `getStaticPaths` to generate routes at build time:
+For static pages, use `getStaticPaths` to generate routes at build time. New or edited CMS entries do not appear until the site rebuilds:
 
 ```astro title="src/pages/posts/[slug].astro"
 ---
@@ -337,7 +337,7 @@ const { entry: post } = await getEmDashEntry("posts", slug);
 
 ### Server-Rendered
 
-For server-rendered pages, query content directly:
+For server-rendered pages, query content directly on each request:
 
 ```astro title="src/pages/posts/[slug].astro"
 ---

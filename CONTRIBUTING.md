@@ -6,8 +6,8 @@ This guide covers setup, policy, and the rules around opening a PR. For code pat
 
 ## Prerequisites
 
-- **Node.js** 22+
-- **pnpm** 10+ (`corepack enable` if you don't have it)
+- **Node.js** 22.13.0+ (odd-numbered versions are not supported)
+- **pnpm** via Corepack (`corepack enable` uses the pinned `packageManager` version)
 - **Git**
 
 ## Setup
