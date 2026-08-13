@@ -2,7 +2,7 @@
 
 This demo shows EmDash running on Cloudflare Workers with D1, R2, and Cloudflare Access auth.
 
-It uses the real `workerd` runtime in development via Astro's Cloudflare adapter.
+Uses Astro 7 + `@astrojs/cloudflare` v14, which runs the real `workerd` runtime in development.
 
 ## Setup
 
@@ -17,6 +17,21 @@ needed. If the database is empty, the configured seed is also applied automatica
 request.
 
 2. Open http://localhost:4321/\_emdash/admin
+
+## Edge HTML cache (Workers Caching)
+
+This demo uses **native Workers Caching**, not the legacy EmDash `cloudflareCache()` helper:
+
+| Piece                | Where                                                              |
+| -------------------- | ------------------------------------------------------------------ |
+| Platform cache on    | `wrangler.jsonc` → `"cache": { "enabled": true }`                  |
+| Astro cache provider | `cacheCloudflare()` from `@astrojs/cloudflare/cache`               |
+| Public page TTLs     | `routeRules` in `astro.config.mjs`                                 |
+| Purge                | `cache.purge()` from `cloudflare:workers` (no zone ID / API token) |
+
+Do **not** copy `cloudflareCache()` from `@emdash-cms/cloudflare` for new sites. That path stores responses in the Cache API and invalidates via the zone REST purge API (`CF_ZONE_ID` + `CF_CACHE_PURGE_TOKEN`). It is a legacy stopgap; see [Deploy to Cloudflare → Workers Cache](https://docs.emdashcms.com/deployment/cloudflare#workers-cache).
+
+Object/query caching (`objectCache: kvCache({ binding: "CACHE" })`) is a separate layer and is optional.
 
 ## Preview
 
@@ -37,8 +52,9 @@ This builds and deploys to Cloudflare Workers. EmDash handles migrations automat
 
 ## Notes
 
-- `astro dev` now uses `workerd` (the real Workers runtime) - development matches production
+- `astro dev` uses `workerd` (the real Workers runtime) — development matches production
 - `wrangler types` runs automatically before dev/build to generate TypeScript types for bindings
 - R2 storage for media uploads is already configured via `storage: r2({ binding: "MEDIA" })`
 - Cloudflare Access auth is already configured; set the expected Access audience in your local
   environment if you want to exercise the admin login flow
+- No `platformProxy` config needed — Astro handles this automatically
