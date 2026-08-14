@@ -4,23 +4,23 @@
 
 This handover package is keyed to the current fork state after merging `upstream/main` into local `main` and applying the docs-audit cleanup commit.
 
-| Scope | Version basis |
-| --- | --- |
-| Workspace root | `1.0.0` |
-| Core release family | `emdash@0.30.0`, `@emdash-cms/admin@0.30.0`, `@emdash-cms/auth@0.30.0`, `@emdash-cms/blocks@0.30.0`, `@emdash-cms/cloudflare@0.30.0`, `create-emdash@0.30.0`, `@emdash-cms/gutenberg-to-portable-text@0.30.0`, `@emdash-cms/x402@0.30.0` |
-| Other published packages | `@emdash-cms/auth-atproto@0.2.29`, `@emdash-cms/plugin-cli@0.8.0`, `@emdash-cms/registry-client@0.3.4`, `@emdash-cms/registry-lexicons@0.3.0`, `@emdash-cms/sandbox-workerd@0.3.0`, `@emdash-cms/registry-verification@0.1.0` |
-| Audit anchor | `emdash@537528c9` with prior docs cleanup commit `c17e3ed1` on `2026-07-21` |
+| Scope                    | Version basis                                                                                                                                                                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Workspace root           | `1.0.0`                                                                                                                                                                                                                                  |
+| Core release family      | `emdash@0.30.0`, `@emdash-cms/admin@0.30.0`, `@emdash-cms/auth@0.30.0`, `@emdash-cms/blocks@0.30.0`, `@emdash-cms/cloudflare@0.30.0`, `create-emdash@0.30.0`, `@emdash-cms/gutenberg-to-portable-text@0.30.0`, `@emdash-cms/x402@0.30.0` |
+| Other published packages | `@emdash-cms/auth-atproto@0.2.29`, `@emdash-cms/plugin-cli@0.8.0`, `@emdash-cms/registry-client@0.3.4`, `@emdash-cms/registry-lexicons@0.3.0`, `@emdash-cms/sandbox-workerd@0.3.0`, `@emdash-cms/registry-verification@0.1.0`            |
+| Audit anchor             | `emdash@537528c9` with prior docs cleanup commit `c17e3ed1` on `2026-07-21`                                                                                                                                                              |
 
 ## Canonical Document Set
 
-| Document | Audience | Role | Status after this pass | Notes |
-| --- | --- | --- | --- | --- |
-| `README.md` | Public / contributors | Product overview and repo entry point | Verified | No local edits in this pass; upstream merge applied cleanly |
-| `CONTRIBUTING.md` | Contributors | Workflow, policy, PR rules, changesets | Updated by upstream | Post-sync verification now runs cleanly under the pinned Node version |
-| `AGENTS.md` | AI agents | Repository-specific engineering rules | Updated by upstream | Sync-first governance remains in place; lint baseline guidance is now no longer stale |
-| `TEMPLATES.md` | Contributors / maintainers | Template workflow and maintenance | Verified | Not changed in this pass |
-| `docs/README.md` | Docs maintainers / AI agents | Docs subproject boundary and operations | Verified | Worklog index extended for this pass |
-| `docs/worklogs/README.md` | AI agents | Worklog naming, required files, and active package index | Updated | Added this dated handover package |
+| Document                  | Audience                     | Role                                                     | Status after this pass | Notes                                                                                 |
+| ------------------------- | ---------------------------- | -------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
+| `README.md`               | Public / contributors        | Product overview and repo entry point                    | Verified               | No local edits in this pass; upstream merge applied cleanly                           |
+| `CONTRIBUTING.md`         | Contributors                 | Workflow, policy, PR rules, changesets                   | Updated by upstream    | Post-sync verification now runs cleanly under the pinned Node version                 |
+| `AGENTS.md`               | AI agents                    | Repository-specific engineering rules                    | Updated by upstream    | Sync-first governance remains in place; lint baseline guidance is now no longer stale |
+| `TEMPLATES.md`            | Contributors / maintainers   | Template workflow and maintenance                        | Verified               | Not changed in this pass                                                              |
+| `docs/README.md`          | Docs maintainers / AI agents | Docs subproject boundary and operations                  | Verified               | Worklog index extended for this pass                                                  |
+| `docs/worklogs/README.md` | AI agents                    | Worklog naming, required files, and active package index | Updated                | Added this dated handover package                                                     |
 
 ## Published/Operational Docs Corrected In This Pass
 

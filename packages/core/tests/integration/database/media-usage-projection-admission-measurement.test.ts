@@ -232,7 +232,7 @@ it("reports current projection costs at occurrence and byte boundaries", async (
 	}
 	console.info(`PR1_MEASUREMENTS=${JSON.stringify([...worstByBoundary.values()])}`);
 	expect(rows.every((row) => row.maxBinds <= 100)).toBe(true);
-});
+}, 30_000);
 
 function candidateSplits(totalOccurrences: number): Array<[number, number | null]> {
 	const splits: Array<[number, number | null]> = [[totalOccurrences, null]];

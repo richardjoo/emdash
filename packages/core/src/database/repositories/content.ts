@@ -1,7 +1,10 @@
 import { sql, type Kysely } from "kysely";
 import { ulid } from "ulidx";
 
-import { invalidateCollectionCache } from "../../object-cache/index.js";
+import {
+	invalidateCollectionCache,
+	invalidateTaxonomyObjectCache,
+} from "../../object-cache/index.js";
 import { buildFtsPrefixMatch, buildSlugGlobPrefix } from "../../search/match.js";
 import { chunks, SQL_BATCH_SIZE } from "../../utils/chunks.js";
 import { isMissingTableError } from "../../utils/db-errors.js";
@@ -1502,6 +1505,37 @@ export class ContentRepository {
 			if (item) resolved.set(identifier, item);
 		}
 		return resolved;
+	}
+
+	private async restampEntryPivot(type: string, id: string): Promise<void> {
+		const tableName = getTableName(type);
+		const inserted = await sql`
+			INSERT INTO content_taxonomies (collection, entry_id, taxonomy_id)
+			SELECT DISTINCT ${type}, content.translation_group, pivot.taxonomy_id
+			FROM content_taxonomies AS pivot
+			INNER JOIN ${sql.ref(tableName)} AS content ON content.id = ${id}
+			WHERE pivot.collection = ${type}
+			AND pivot.entry_id = ${id}
+			AND content.translation_group IS NOT NULL
+			AND content.translation_group != ${id}
+			ON CONFLICT (collection, entry_id, taxonomy_id) DO NOTHING
+		`.execute(this.db);
+
+		const deleted = await sql`
+			DELETE FROM content_taxonomies
+			WHERE collection = ${type}
+			AND entry_id = ${id}
+			AND EXISTS (
+				SELECT 1 FROM ${sql.ref(tableName)} AS content
+				WHERE content.id = ${id}
+				AND content.translation_group IS NOT NULL
+				AND content.translation_group != ${id}
+			)
+		`.execute(this.db);
+
+		if ((inserted.numAffectedRows ?? 0n) > 0n || (deleted.numAffectedRows ?? 0n) > 0n) {
+			invalidateTaxonomyObjectCache();
+		}
 	}
 
 	/**

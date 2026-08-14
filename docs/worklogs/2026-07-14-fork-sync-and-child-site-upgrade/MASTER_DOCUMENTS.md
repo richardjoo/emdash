@@ -4,27 +4,27 @@
 
 This handover package is keyed to the current fork state after syncing `richardjoo/emdash` with `upstream/main` and upgrading `richardjoo-com` to released packages.
 
-| Scope | Version basis |
-| --- | --- |
-| Workspace root | `1.0.0` |
-| Core release family | `emdash@0.28.1`, `@emdash-cms/admin@0.28.1`, `@emdash-cms/auth@0.28.1`, `@emdash-cms/blocks@0.28.1`, `@emdash-cms/cloudflare@0.28.1`, `create-emdash@0.28.1`, `@emdash-cms/gutenberg-to-portable-text@0.28.1`, `@emdash-cms/x402@0.28.1` |
-| Other published packages | `@emdash-cms/auth-atproto@0.2.27`, `@emdash-cms/plugin-cli@0.6.0`, `@emdash-cms/registry-client@0.3.2`, `@emdash-cms/registry-lexicons@0.1.1`, `@emdash-cms/sandbox-workerd@0.1.19`, `@emdash-cms/contentful-to-portable-text@0.1.0` |
-| Child-site consume target | `richardjoo-com` uses `emdash@0.28.1`, `@emdash-cms/cloudflare@0.28.1`, `astro@7.0.3`, `@astrojs/cloudflare@14.0.1`, `@emdash-cms/plugin-forms@0.2.4`, `@emdash-cms/plugin-webhook-notifier@0.2.0` |
-| Audit anchor | `emdash@e9011e0f`, `richardjoo-com@4bbe2e4` on `2026-07-14` |
+| Scope                     | Version basis                                                                                                                                                                                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Workspace root            | `1.0.0`                                                                                                                                                                                                                                  |
+| Core release family       | `emdash@0.28.1`, `@emdash-cms/admin@0.28.1`, `@emdash-cms/auth@0.28.1`, `@emdash-cms/blocks@0.28.1`, `@emdash-cms/cloudflare@0.28.1`, `create-emdash@0.28.1`, `@emdash-cms/gutenberg-to-portable-text@0.28.1`, `@emdash-cms/x402@0.28.1` |
+| Other published packages  | `@emdash-cms/auth-atproto@0.2.27`, `@emdash-cms/plugin-cli@0.6.0`, `@emdash-cms/registry-client@0.3.2`, `@emdash-cms/registry-lexicons@0.1.1`, `@emdash-cms/sandbox-workerd@0.1.19`, `@emdash-cms/contentful-to-portable-text@0.1.0`     |
+| Child-site consume target | `richardjoo-com` uses `emdash@0.28.1`, `@emdash-cms/cloudflare@0.28.1`, `astro@7.0.3`, `@astrojs/cloudflare@14.0.1`, `@emdash-cms/plugin-forms@0.2.4`, `@emdash-cms/plugin-webhook-notifier@0.2.0`                                       |
+| Audit anchor              | `emdash@e9011e0f`, `richardjoo-com@4bbe2e4` on `2026-07-14`                                                                                                                                                                              |
 
 ## Canonical Document Set
 
-| Document | Audience | Role | Status after this pass | Notes |
-| --- | --- | --- | --- | --- |
-| `README.md` | Public / contributors | Product overview and repo entry point | Verified | Cross-links remain current; no substantive edits were needed in this pass |
-| `CONTRIBUTING.md` | Contributors | Workflow, policy, PR rules, changesets | Verified | Current guidance remained accurate after the upstream sync |
-| `AGENTS.md` | AI agents | Repository-specific engineering rules | Updated | Fixed the symlink/tool-directory note, made fork sync mandatory when behind, and clarified dirty-lint baseline handling |
-| `TEMPLATES.md` | Contributors / maintainers | Template workflow and maintenance | Verified | Screenshot harness mismatch is still accurately documented |
-| `docs/README.md` | Docs maintainers / AI agents | Docs subproject boundary and operations | Verified | Published-docs vs internal-worklogs boundary remains accurate |
-| `docs/orchestrator/README.md` | Orchestrator agents | Cross-repo governance overview | Updated | Added an explicit hard rule that fork sync is mandatory before substantive work if behind upstream |
-| `docs/orchestrator/SINGLE_AGENT_MODE.md` | Orchestrator agents | Authoritative cross-repo execution sequence | Updated | Clarified the sync-first sequence and cleaned up the child-site-target step wording |
-| `docs/orchestrator/CHILD_SITE_REGISTRY.md` | Orchestrator agents | Child-site consume state and patch exceptions | Updated | `richardjoo-com` now records released `0.28.1` packages and `none` for the patch exception |
-| `docs/worklogs/README.md` | AI agents | Worklog naming, required files, and active package index | Updated | Added this dated handover package to the index |
+| Document                                   | Audience                     | Role                                                     | Status after this pass | Notes                                                                                                                   |
+| ------------------------------------------ | ---------------------------- | -------------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `README.md`                                | Public / contributors        | Product overview and repo entry point                    | Verified               | Cross-links remain current; no substantive edits were needed in this pass                                               |
+| `CONTRIBUTING.md`                          | Contributors                 | Workflow, policy, PR rules, changesets                   | Verified               | Current guidance remained accurate after the upstream sync                                                              |
+| `AGENTS.md`                                | AI agents                    | Repository-specific engineering rules                    | Updated                | Fixed the symlink/tool-directory note, made fork sync mandatory when behind, and clarified dirty-lint baseline handling |
+| `TEMPLATES.md`                             | Contributors / maintainers   | Template workflow and maintenance                        | Verified               | Screenshot harness mismatch is still accurately documented                                                              |
+| `docs/README.md`                           | Docs maintainers / AI agents | Docs subproject boundary and operations                  | Verified               | Published-docs vs internal-worklogs boundary remains accurate                                                           |
+| `docs/orchestrator/README.md`              | Orchestrator agents          | Cross-repo governance overview                           | Updated                | Added an explicit hard rule that fork sync is mandatory before substantive work if behind upstream                      |
+| `docs/orchestrator/SINGLE_AGENT_MODE.md`   | Orchestrator agents          | Authoritative cross-repo execution sequence              | Updated                | Clarified the sync-first sequence and cleaned up the child-site-target step wording                                     |
+| `docs/orchestrator/CHILD_SITE_REGISTRY.md` | Orchestrator agents          | Child-site consume state and patch exceptions            | Updated                | `richardjoo-com` now records released `0.28.1` packages and `none` for the patch exception                              |
+| `docs/worklogs/README.md`                  | AI agents                    | Worklog naming, required files, and active package index | Updated                | Added this dated handover package to the index                                                                          |
 
 ## Canonical Decisions Locked In
 

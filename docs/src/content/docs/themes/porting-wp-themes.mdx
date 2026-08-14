@@ -182,19 +182,19 @@ orderBy: { publishedAt: "desc" },
 <TabItem label="EmDash">
 ```astro title="src/pages/posts/[slug].astro"
 ---
-import { getEmDashCollection, getEntryTerms } from "emdash";
+import { getEmDashEntry, getEntryTerms } from "emdash";
 import { PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 
-export async function getStaticPaths() {
-	const { entries: posts } = await getEmDashCollection("posts");
-	return posts.map((post) => ({
-		params: { slug: post.slug },
-		props: { post },
-	}));
+export const prerender = false;
+
+const { slug } = Astro.params;
+const { entry: post } = await getEmDashEntry("posts", slug!);
+
+if (!post) {
+	return Astro.redirect("/404");
 }
 
-const { post } = Astro.props;
 const categories = await getEntryTerms("posts", post.id, "categories");
 
 ---
@@ -311,18 +311,18 @@ Query taxonomies registered in the theme:
 
 ```astro title="src/pages/genres/[slug].astro"
 ---
-import { getTaxonomyTerms, getEntriesByTerm } from "emdash";
+import { getTerm, getEntriesByTerm } from "emdash";
 import Base from "../../layouts/Base.astro";
 
-export async function getStaticPaths() {
-  const genres = await getTaxonomyTerms("genre");
-  return genres.map((genre) => ({
-    params: { slug: genre.slug },
-    props: { genre },
-  }));
+export const prerender = false;
+
+const { slug } = Astro.params;
+const genre = await getTerm("genre", slug!);
+
+if (!genre) {
+  return Astro.redirect("/404");
 }
 
-const { genre } = Astro.props;
 const books = await getEntriesByTerm("books", "genre", genre.slug);
 ---
 

@@ -94,7 +94,10 @@ export class AdminPage {
 			this.waitForHydration().catch(() => {}),
 		]);
 
-		const loaderVisible = await this.page.getByText("Loading EmDash...").isVisible().catch(() => false);
+		const loaderVisible = await this.page
+			.getByText("Loading EmDash...")
+			.isVisible()
+			.catch(() => false);
 		if (loaderVisible) {
 			await this.waitForHydration();
 		}

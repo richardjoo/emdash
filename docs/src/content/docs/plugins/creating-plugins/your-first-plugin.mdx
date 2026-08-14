@@ -189,7 +189,7 @@ export default defineConfig({
 });
 ```
 
-`sandboxRunner` is the pluggable piece. The example uses `sandbox()` from `@emdash-cms/cloudflare`, the runner most sites use today. If no runner is configured (or the configured runner is unavailable on the current platform), `sandboxed: []` plugins are skipped at startup — move the plugin into `plugins: []` to run it in-process.
+`sandboxRunner` is the pluggable piece. The example uses `sandbox()` from `@emdash-cms/cloudflare`, the runner most sites use today on D1-backed Cloudflare deployments. If no runner is configured (or the configured runner is unavailable on the current platform), `sandboxed: []` plugins are skipped at startup — move the plugin into `plugins: []` to run it in-process.
 
 <Aside type="caution" title="Cloudflare runner needs Worker Loader">
 	The `@emdash-cms/cloudflare` sandbox runner uses Cloudflare Workers' Dynamic
