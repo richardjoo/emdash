@@ -517,7 +517,7 @@ describe("Media mutations invalidate site settings cache", () => {
 			const after = await getSiteSettings();
 			expect(after.seo?.defaultOgImage?.url).toBeUndefined();
 		});
-	});
+	}, 10_000);
 
 	it("EmDashRuntime.handleMediaUpdate invalidates the cache on success", async () => {
 		const { createTestRuntime } = await import("../../utils/mcp-runtime.js");

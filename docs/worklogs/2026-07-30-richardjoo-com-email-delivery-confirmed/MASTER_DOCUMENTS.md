@@ -4,10 +4,10 @@
 
 This package is keyed to the current pushed child-site state after commit `750442e`.
 
-| Scope | Version basis |
-| --- | --- |
+| Scope                    | Version basis                                   |
+| ------------------------ | ----------------------------------------------- |
 | Orchestrator repo anchor | `emdash@b9664a24` before this follow-up package |
-| Child-site repo | `richardjoo-com@750442e` |
+| Child-site repo          | `richardjoo-com@750442e`                        |
 
 ## Canonical Outcome
 
