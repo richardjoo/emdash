@@ -285,6 +285,7 @@ export class AdminPage {
 	 */
 	async goToSetup(): Promise<void> {
 		await this.goto("/setup");
+		await this.waitForHydration();
 	}
 
 	// ============================================

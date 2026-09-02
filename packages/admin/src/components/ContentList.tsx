@@ -2,13 +2,15 @@ import {
 	Badge,
 	Button,
 	Checkbox,
+	DatePicker,
 	Dialog,
-	Input,
 	LinkButton,
 	Loader,
+	Popover,
 	Select,
 	Tabs,
 } from "@cloudflare/kumo";
+import type { DateRange } from "@cloudflare/kumo";
 import { plural } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react/macro";
 import {
@@ -17,8 +19,8 @@ import {
 	Trash,
 	ArrowCounterClockwise,
 	ArrowSquareOut,
+	Calendar,
 	Copy,
-	MagnifyingGlass,
 	CaretUp,
 	CaretDown,
 	CaretUpDown,
@@ -28,10 +30,25 @@ import {
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 
-import type { ContentAuthor, ContentDateField, ContentItem, TrashedContentItem } from "../lib/api";
+import type {
+	AdminManifest,
+	ContentAuthor,
+	ContentDateField,
+	ContentItem,
+	TrashedContentItem,
+} from "../lib/api.js";
+import {
+	ContentListColumnBoundary,
+	resolveContentListColumns,
+	type ResolvedContentListColumn,
+} from "../lib/content-list-columns.js";
+import { getEntryTitle } from "../lib/entryTitle.js";
 import { useDebouncedValue } from "../lib/hooks.js";
+import { usePluginAdmins } from "../lib/plugin-context.js";
 import { contentUrl } from "../lib/url.js";
 import { cn, parseTimestamp } from "../lib/utils";
+import { getLocaleDir } from "../locales/config.js";
+import { getDayPickerLocale } from "../locales/day-picker.js";
 import { CaretNext, CaretPrev } from "./ArrowIcons.js";
 import {
 	BylineFilter,
@@ -46,9 +63,14 @@ import {
 } from "./ContentStatusBadge.js";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { RouterLinkButton } from "./RouterLinkButton.js";
+import { TableToolbar, TableToolbarSearch } from "./TableToolbar.js";
 
-/** Sortable content list columns. Maps to the server's order field whitelist. */
-export type ContentListSortField = "title" | "status" | "locale" | "updatedAt";
+/**
+ * Sortable content list columns. The named values map to the server's system
+ * order fields; a collection's configured titleField/dateField slug is also
+ * accepted, which the server validates against the collection.
+ */
+export type ContentListSortField = "title" | "status" | "locale" | "updatedAt" | (string & {});
 export interface ContentListSort {
 	field: ContentListSortField;
 	direction: "asc" | "desc";
@@ -104,6 +126,10 @@ export interface ContentListProps {
 	onLocaleChange?: (locale: string) => void;
 	/** URL pattern for published content links (e.g. `/blog/{slug}`) */
 	urlPattern?: string;
+	/** Collection field slug powering the Title column (falls back to the title chain). */
+	titleField?: string;
+	/** Collection field slug (datetime) powering the Date column (falls back to updated date). */
+	dateField?: string;
 	/**
 	 * Controlled sort state. When `onSortChange` is also provided, the column
 	 * headers become sort controls that invoke it. Uncontrolled sort keeps
@@ -155,6 +181,10 @@ export interface ContentListProps {
 	onBulkPublish?: BulkActionHandler;
 	onBulkUnpublish?: BulkActionHandler;
 	onBulkDelete?: BulkActionHandler;
+	/** Current role used only for contributed-column visibility, not authorization. */
+	userRole?: number;
+	/** Manifest state used to omit disabled or stale trusted-plugin contributions. */
+	pluginStates?: AdminManifest["plugins"];
 }
 
 type BulkActionHandler = (ids: string[]) => Promise<string[]>;
@@ -163,15 +193,37 @@ type ViewTab = "all" | "trash";
 
 const PAGE_SIZE = 20;
 
-function getItemTitle(item: { data: Record<string, unknown>; slug: string | null; id: string }) {
-	const rawTitle = item.data.title;
-	const rawName = item.data.name;
-	return (
-		(typeof rawTitle === "string" ? rawTitle : "") ||
-		(typeof rawName === "string" ? rawName : "") ||
-		item.slug ||
-		item.id
-	);
+const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Parse a dateField value for the Date column. Returns null if missing or
+ * unparseable (so the caller falls back to a system date instead of showing
+ * "Invalid Date"). Bare `YYYY-MM-DD` is read as local midnight to avoid a
+ * previous-day shift in negative-UTC timezones.
+ */
+function parseListDate(value: unknown): Date | null {
+	if (typeof value !== "string" || !value) return null;
+	const normalized = DATE_ONLY_RE.test(value) ? `${value}T00:00:00` : value;
+	const parsed = new Date(normalized);
+	return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function parseDateOnly(value: string): Date | undefined {
+	if (!DATE_ONLY_RE.test(value)) return undefined;
+	const [year, month, day] = value.split("-").map(Number);
+	if (year === undefined || month === undefined || day === undefined) return undefined;
+	const date = new Date(year, month - 1, day);
+	return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+		? date
+		: undefined;
+}
+
+function formatDateOnly(date: Date | undefined): string {
+	if (!date) return "";
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
 }
 
 /**
@@ -198,6 +250,8 @@ export function ContentList({
 	activeLocale,
 	onLocaleChange,
 	urlPattern,
+	titleField,
+	dateField,
 	sort,
 	onSortChange,
 	total,
@@ -214,8 +268,11 @@ export function ContentList({
 	onBulkPublish,
 	onBulkUnpublish,
 	onBulkDelete,
+	userRole = 0,
+	pluginStates,
 }: ContentListProps) {
 	const { t } = useLingui();
+	const pluginAdmins = usePluginAdmins();
 	const [activeTab, setActiveTab] = React.useState<ViewTab>("all");
 	const [searchQuery, setSearchQuery] = React.useState("");
 	const [page, setPage] = React.useState(0);
@@ -244,8 +301,8 @@ export function ContentList({
 	const filteredItems = React.useMemo(() => {
 		if (serverSearch || !searchQuery) return items;
 		const query = searchQuery.toLowerCase();
-		return items.filter((item) => getItemTitle(item).toLowerCase().includes(query));
-	}, [items, searchQuery, serverSearch]);
+		return items.filter((item) => getEntryTitle(item, titleField).toLowerCase().includes(query));
+	}, [items, searchQuery, serverSearch, titleField]);
 
 	// The query the current `items` reflect: server-side filtering lags behind
 	// typing by the debounce, so the empty-state message must use the debounced
@@ -322,6 +379,10 @@ export function ContentList({
 			return next;
 		});
 	const selectedCount = selectedIds.size;
+	const extensionColumns = React.useMemo(
+		() => resolveContentListColumns(pluginAdmins, collection, userRole, pluginStates),
+		[collection, pluginAdmins, pluginStates, userRole],
+	);
 	const [bulkBusy, setBulkBusy] = React.useState(false);
 	const runBulk = (fn?: BulkActionHandler) => {
 		if (!fn || selectedCount === 0 || bulkBusy) return;
@@ -342,7 +403,8 @@ export function ContentList({
 			}
 		})();
 	};
-	const colSpan = (i18n ? 5 : 4) + listColumns.length + (bulkEnabled ? 1 : 0);
+	const colSpan =
+		(i18n ? 5 : 4) + listColumns.length + extensionColumns.length + (bulkEnabled ? 1 : 0);
 
 	return (
 		<div className="space-y-4">
@@ -370,21 +432,6 @@ export function ContentList({
 				</RouterLinkButton>
 			</div>
 
-			{/* Search */}
-			{(serverSearch || items.length > 0) && (
-				<div className="relative max-w-sm">
-					<MagnifyingGlass className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-kumo-subtle" />
-					<Input
-						type="search"
-						placeholder={t`Search ${collectionLabel.toLowerCase()}...`}
-						aria-label={t`Search ${collectionLabel.toLowerCase()}`}
-						value={searchQuery}
-						onChange={handleSearchChange}
-						className="ps-9"
-					/>
-				</div>
-			)}
-
 			{/* Tabs */}
 			<Tabs
 				variant="underline"
@@ -410,20 +457,31 @@ export function ContentList({
 			{/* Content based on active tab */}
 			{activeTab === "all" ? (
 				<>
-					{/* Filters */}
-					{onStatusFilterChange && (
-						<FilterBar
-							statusFilter={statusFilter}
-							onStatusFilterChange={onStatusFilterChange}
-							authors={authors}
-							authorFilter={authorFilter}
-							onAuthorFilterChange={onAuthorFilterChange}
-							dateFilter={dateFilter}
-							onDateFilterChange={onDateFilterChange}
-							bylineFilter={bylineFilter}
-							onBylineFilterChange={onBylineFilterChange}
-							locale={activeLocale ?? undefined}
-						/>
+					{(serverSearch || items.length > 0 || onStatusFilterChange) && (
+						<TableToolbar>
+							{(serverSearch || items.length > 0) && (
+								<TableToolbarSearch
+									placeholder={t`Search ${collectionLabel.toLowerCase()}...`}
+									aria-label={t`Search ${collectionLabel.toLowerCase()}`}
+									value={searchQuery}
+									onChange={handleSearchChange}
+								/>
+							)}
+							{onStatusFilterChange && (
+								<FilterBar
+									statusFilter={statusFilter}
+									onStatusFilterChange={onStatusFilterChange}
+									authors={authors}
+									authorFilter={authorFilter}
+									onAuthorFilterChange={onAuthorFilterChange}
+									dateFilter={dateFilter}
+									onDateFilterChange={onDateFilterChange}
+									bylineFilter={bylineFilter}
+									onBylineFilterChange={onBylineFilterChange}
+									locale={activeLocale ?? undefined}
+								/>
+							)}
+						</TableToolbar>
 					)}
 
 					{/* Bulk action toolbar — appears once one or more rows are selected */}
@@ -529,8 +587,10 @@ export function ContentList({
 											/>
 										</th>
 									)}
+									{/* The Title/Date columns sort by the collection's configured
+									    titleField/dateField when set */}
 									<SortableTh
-										field="title"
+										field={titleField ?? "title"}
 										sort={sort}
 										onSortChange={onSortChange}
 										label={t`Title`}
@@ -559,11 +619,19 @@ export function ContentList({
 										/>
 									)}
 									<SortableTh
-										field="updatedAt"
+										field={dateField ?? "updatedAt"}
 										sort={sort}
 										onSortChange={onSortChange}
 										label={t`Date`}
 									/>
+									{extensionColumns.map((column) => (
+										<ExtensionColumnHeader
+											key={`${column.pluginId}:${column.extension.id}`}
+											column={column}
+											collection={collection}
+											locale={activeLocale}
+										/>
+									))}
 									<th scope="col" className="px-4 py-3 text-end text-sm font-medium">
 										{t`Actions`}
 									</th>
@@ -610,15 +678,19 @@ export function ContentList({
 										<ContentListItem
 											key={item.id}
 											item={item}
+											visibleItems={paginatedItems}
 											collection={collection}
 											onDelete={onDelete}
 											onDuplicate={onDuplicate}
 											showLocale={!!i18n}
 											urlPattern={urlPattern}
+											titleField={titleField}
+											dateField={dateField}
 											listColumns={listColumns}
 											selectable={bulkEnabled}
 											selected={selectedIds.has(item.id)}
 											onToggleSelect={toggleOne}
+											extensionColumns={extensionColumns}
 										/>
 									))
 								)}
@@ -712,6 +784,7 @@ export function ContentList({
 										<TrashedListItem
 											key={item.id}
 											item={item}
+											titleField={titleField}
 											onRestore={onRestore}
 											onPermanentDelete={onPermanentDelete}
 										/>
@@ -809,9 +882,10 @@ function FilterBar({
 	};
 
 	return (
-		<div className="flex flex-wrap items-end gap-3">
+		<>
 			<Select
 				size="sm"
+				className="emdash-status-filter-trigger min-w-32 ps-3.5"
 				aria-label={t`Filter by status`}
 				value={statusFilter}
 				onValueChange={(v) => onStatusFilterChange((v as ContentStatusFilter) ?? "all")}
@@ -821,7 +895,7 @@ function FilterBar({
 				items={statusItems}
 			>
 				{Object.entries(statusItems).map(([value]) => (
-					<Select.Option key={value} value={value}>
+					<Select.Option key={value} value={value} className="emdash-compact-select-option text-xs">
 						{renderStatusLabel(value as ContentStatusFilter)}
 					</Select.Option>
 				))}
@@ -852,9 +926,10 @@ function FilterBar({
 			)}
 
 			{showDateFilter && (
-				<div className="flex flex-wrap items-end gap-2">
+				<>
 					<Select
 						size="sm"
+						className="emdash-date-field-filter-trigger min-w-28 ps-3.5"
 						aria-label={t`Date field to filter on`}
 						value={dateFilter.field}
 						onValueChange={(v) =>
@@ -863,29 +938,17 @@ function FilterBar({
 						items={dateFieldItems}
 					>
 						{Object.entries(dateFieldItems).map(([value, label]) => (
-							<Select.Option key={value} value={value}>
+							<Select.Option
+								key={value}
+								value={value}
+								className="emdash-compact-select-option text-xs"
+							>
 								{label}
 							</Select.Option>
 						))}
 					</Select>
-					<Input
-						type="date"
-						size="sm"
-						aria-label={t`From date`}
-						value={dateFilter.from}
-						max={dateFilter.to || undefined}
-						onChange={(e) => onDateFilterChange?.({ ...dateFilter, from: e.target.value })}
-					/>
-					<span className="pb-2 text-sm text-kumo-subtle">{t`to`}</span>
-					<Input
-						type="date"
-						size="sm"
-						aria-label={t`To date`}
-						value={dateFilter.to}
-						min={dateFilter.from || undefined}
-						onChange={(e) => onDateFilterChange?.({ ...dateFilter, to: e.target.value })}
-					/>
-				</div>
+					<DateRangeFilter value={dateFilter} onChange={onDateFilterChange} />
+				</>
 			)}
 
 			{hasActiveFilter && (
@@ -893,7 +956,110 @@ function FilterBar({
 					{t`Clear filters`}
 				</Button>
 			)}
-		</div>
+		</>
+	);
+}
+
+function DateRangeFilter({
+	value,
+	onChange,
+}: {
+	value: ContentDateFilter;
+	onChange: (filter: ContentDateFilter) => void;
+}) {
+	const { i18n, t } = useLingui();
+	const from = parseDateOnly(value.from);
+	const to = parseDateOnly(value.to);
+	const formatter = React.useMemo(
+		() => new Intl.DateTimeFormat(i18n.locale, { dateStyle: "medium" }),
+		[i18n.locale],
+	);
+	const rangeLabel = from
+		? to
+			? formatter.formatRange(from, to)
+			: t`From ${formatter.format(from)}`
+		: to
+			? t`Until ${formatter.format(to)}`
+			: t`Date range`;
+	const selected: DateRange | undefined = from ? { from, to } : to ? { from: to, to } : undefined;
+	const dayPickerLocale = getDayPickerLocale(i18n.locale);
+	const direction = getLocaleDir(i18n.locale);
+	const isUpperBoundOnly = !from && !!to;
+	const canUseAsEndDate = !!from && (!to || value.from === value.to);
+
+	const handleChange = (range: DateRange | undefined, triggerDate?: Date) => {
+		if (isUpperBoundOnly && triggerDate) {
+			onChange({
+				...value,
+				from: "",
+				to: formatDateOnly(triggerDate),
+			});
+			return;
+		}
+		onChange({
+			...value,
+			from: formatDateOnly(range?.from),
+			to: formatDateOnly(range?.to),
+		});
+	};
+	const handleUseAsEndDate = () => {
+		if (!from || !canUseAsEndDate) return;
+		onChange({
+			...value,
+			from: "",
+			to: formatDateOnly(from),
+		});
+	};
+
+	return (
+		<Popover>
+			<Popover.Trigger
+				render={
+					<Button
+						variant="secondary"
+						size="sm"
+						icon={
+							<span
+								className="emdash-date-range-icon flex size-3 shrink-0 items-center justify-center"
+								aria-hidden="true"
+							>
+								<Calendar className="size-3" />
+							</span>
+						}
+						aria-label={t`Filter by date range: ${rangeLabel}`}
+						className="emdash-date-range-trigger px-3.5 font-normal"
+					/>
+				}
+			>
+				<span className="emdash-date-range-label">{rangeLabel}</span>
+			</Popover.Trigger>
+			<Popover.Content align="start" className="w-auto px-3 py-2.5">
+				<Popover.Title className="text-sm font-medium">{t`Choose a date range`}</Popover.Title>
+				<DatePicker
+					mode="range"
+					selected={selected}
+					defaultMonth={from ?? to}
+					onChange={handleChange}
+					aria-label={t`Choose a date range`}
+					className="mt-1"
+					locale={dayPickerLocale}
+					dir={direction}
+				/>
+				<div className="mt-1 flex flex-wrap items-center justify-end gap-2 border-t border-kumo-line pt-2">
+					{(from || to) && (
+						<Button size="sm" variant="ghost" onClick={() => handleChange(undefined)}>
+							{t`Clear`}
+						</Button>
+					)}
+					{canUseAsEndDate && (
+						<Button size="sm" variant="ghost" onClick={handleUseAsEndDate}>
+							{t`Use as end date`}
+						</Button>
+					)}
+					<Popover.Close render={<Button size="sm" variant="secondary" />}>{t`Done`}</Popover.Close>
+				</div>
+			</Popover.Content>
+		</Popover>
 	);
 }
 
@@ -962,6 +1128,39 @@ function SortableTh({ field, sort, onSortChange, label }: SortableThProps) {
 	);
 }
 
+interface ExtensionColumnHeaderProps {
+	column: ResolvedContentListColumn;
+	collection: string;
+	locale?: string;
+}
+
+function ExtensionColumnHeader({ column, collection, locale }: ExtensionColumnHeaderProps) {
+	const { i18n } = useLingui();
+	const { pluginId, extension } = column;
+	const Header = extension.header;
+	const label = i18n._(extension.label);
+
+	return (
+		<th
+			scope="col"
+			aria-label={label}
+			className={cn(
+				"px-4 py-3 text-sm font-medium",
+				extension.align === "end" ? "text-end" : "text-start",
+			)}
+		>
+			<ContentListColumnBoundary
+				key={`${collection}:${locale ?? ""}:${pluginId}:${extension.id}`}
+				pluginId={pluginId}
+				columnId={extension.id}
+				fallback={label}
+			>
+				{Header ? <Header collection={collection} locale={locale} /> : label}
+			</ContentListColumnBoundary>
+		</th>
+	);
+}
+
 /**
  * Render the row-count line above pagination. The rules are:
  * - A search query always wins — say how many matches there are. In
@@ -1006,32 +1205,43 @@ function renderItemCount({
 
 interface ContentListItemProps {
 	item: ContentItem;
+	visibleItems: readonly ContentItem[];
 	collection: string;
 	onDelete?: (id: string) => void;
 	onDuplicate?: (id: string) => void;
 	showLocale?: boolean;
 	urlPattern?: string;
+	titleField?: string;
+	dateField?: string;
 	listColumns: ContentListColumn[];
 	selectable?: boolean;
 	selected?: boolean;
 	onToggleSelect?: (id: string) => void;
+	extensionColumns?: ResolvedContentListColumn[];
 }
 
 function ContentListItem({
 	item,
+	visibleItems,
 	collection,
 	onDelete,
 	onDuplicate,
 	showLocale,
 	urlPattern,
+	titleField,
+	dateField,
 	listColumns,
 	selectable,
 	selected,
 	onToggleSelect,
+	extensionColumns,
 }: ContentListItemProps) {
 	const { t } = useLingui();
-	const title = getItemTitle(item);
-	const date = parseTimestamp(item.updatedAt || item.createdAt);
+	const title = getEntryTitle(item, titleField);
+	// A configured dateField drives the Date column; fall back to the
+	// last-updated / created date when it's unset, empty, or unparseable.
+	const customDate = dateField ? parseListDate(item.data[dateField]) : null;
+	const date = customDate ?? parseTimestamp(item.updatedAt || item.createdAt);
 
 	return (
 		<tr className={cn("hover:bg-kumo-tint/25", selected && "bg-kumo-tint/40")}>
@@ -1073,6 +1283,32 @@ function ContentListItem({
 			<td data-testid="content-updated" className="px-4 py-3 text-sm text-kumo-subtle">
 				{date.toLocaleDateString()}
 			</td>
+			{extensionColumns?.map(({ pluginId, extension }) => {
+				const Cell = extension.cell;
+				return (
+					<td
+						key={`${pluginId}:${extension.id}`}
+						className={cn(
+							"px-4 py-3 text-sm",
+							extension.align === "end" ? "text-end" : "text-start",
+						)}
+					>
+						<ContentListColumnBoundary
+							key={`${collection}:${item.locale}:${item.id}:${pluginId}:${extension.id}`}
+							pluginId={pluginId}
+							columnId={extension.id}
+							resetKey={item.updatedAt}
+						>
+							<Cell
+								collection={collection}
+								item={item}
+								locale={item.locale}
+								visibleItems={visibleItems}
+							/>
+						</ContentListColumnBoundary>
+					</td>
+				);
+			})}
 			<td className="px-4 py-3 text-end">
 				<div className="flex items-center justify-end space-x-1">
 					{item.status === "published" && item.slug && (
@@ -1242,13 +1478,14 @@ function scalarListColumnValue(value: unknown): string | undefined {
 
 interface TrashedListItemProps {
 	item: TrashedContentItem;
+	titleField?: string;
 	onRestore?: (id: string) => void;
 	onPermanentDelete?: (id: string) => void;
 }
 
-function TrashedListItem({ item, onRestore, onPermanentDelete }: TrashedListItemProps) {
+function TrashedListItem({ item, titleField, onRestore, onPermanentDelete }: TrashedListItemProps) {
 	const { t } = useLingui();
-	const title = getItemTitle(item);
+	const title = getEntryTitle(item, titleField);
 	const deletedDate = parseTimestamp(item.deletedAt);
 
 	return (

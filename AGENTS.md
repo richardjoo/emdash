@@ -1,8 +1,10 @@
 This file provides guidance to agentic coding tools working in this repository.
 
-For human-facing contributor info (setup, repo layout, PR policy, changesets, i18n), see `CONTRIBUTING.md`. This file focuses on the patterns and gotchas an agent needs to write correct code.
+For human-facing contributor info (setup, repo layout, PR policy, i18n), see [CONTRIBUTING.md](CONTRIBUTING.md). This file focuses on the patterns and gotchas an agent needs to write correct code.
 
-`.claude/CLAUDE.md` is a symlink to this file and `.claude/skills` is a symlink to `../skills`. This checkout also has a local `.opencode/` tool directory, but no `.opencode/skills` symlink -- don't try to create or sync one as part of repo work.
+`.claude/CLAUDE.md` is a symlink to this file. `.agents/skills` and `.claude/skills` are symlinks to `skills/`. Don't copy or synchronize files between them. `.opencode/` has no `skills` symlink; don't create one as part of repository work.
+
+When writing, revising, or reviewing documentation, load the `writing-emdash-docs` skill. Use it for public docs, READMEs, contributor guidance, technical specifications, release notes and changesets, and skill instructions.
 
 Cross-repo CMS orchestration governance lives under `docs/orchestrator/`. Read `docs/orchestrator/README.md` before doing work that spans this repo and child site repos.
 
@@ -16,7 +18,7 @@ Internal project handovers and work logs live under `docs/worklogs/`. When prese
 
 **Localize everything user-facing.** All admin UI strings, aria labels, and toast messages go through Lingui. All admin layout uses RTL-safe logical Tailwind classes. See [Localization](#admin-ui-localization-lingui) and [RTL](#admin-ui-rtl-safe-tailwind).
 
-**Scope discipline.** No drive-by refactors, no bulk lint/type cleanups, no "while I'm here" edits in unrelated files. If you see a systemic issue, open a Discussion. See `CONTRIBUTING.md`, section `Contribution Policy`.
+**Scope discipline.** No drive-by refactors, no bulk lint/type cleanups, no "while I'm here" edits in unrelated files. If you see a systemic issue, open a Discussion. See [CONTRIBUTING.md § Contribution Policy](CONTRIBUTING.md#contribution-policy).
 
 **Never add queries to the logged-out hot path.** Any change that increases the query count of a logged-out route needs a _really_ good reason -- and that includes cold-start or first-request-only queries, not just steady state. See [Performance](#performance-caching-and-query-patterns).
 
@@ -26,7 +28,7 @@ Internal project handovers and work logs live under `docs/worklogs/`. When prese
 
 **CRITICAL: If this repository is being worked from a fork, check upstream before doing substantive work.** Run `git fetch upstream --prune` and compare your branch or `origin/main` against `upstream/main` first. If `origin/main` is behind `upstream/main`, sync the fork before any other substantive work. After the fork is current, update any affected child sites serially under `docs/orchestrator/` governance.
 
-Run `pnpm lint:json | jq '.diagnostics | length'` before starting and record the result. If it was clean before your edits and fails after, your changes caused it; if the baseline is already failing, treat that as an existing repo issue and note it in your handover.
+Before starting any work that involves editing code, run `pnpm lint:json | jq '.diagnostics | length'` and record the result. If it was clean before your edits and fails afterward, your changes caused it; if the baseline is already failing, treat that as an existing repo issue and note it in your handover.
 
 If repo commands fail before the workspace even loads, switch to the Node version pinned in `.nvmrc` first. Running under the wrong Node version can break `pnpm`/`oxlint` before you reach repo checks.
 
@@ -36,9 +38,9 @@ During work:
 - `pnpm typecheck` (packages) or `pnpm typecheck:demos` (Astro demos) after each round of edits
 - `pnpm format` regularly (oxfmt, tabs)
 
-Before opening a PR: tests pass, lint clean, formatted, changeset added if a published package changed. See `CONTRIBUTING.md`, section `Changesets`.
+Before opening a PR: tests pass, lint clean, formatted, changeset added if a published package changed. See [.changeset/README.md](.changeset/README.md).
 
-A changeset is release notes a user reads while upgrading -- **not** a commit message, PR description, or summary of your diff. Do not paste your PR prose into it. Write for someone who will run the new version and wants to know what changed for them: lead with a present-tense verb (`Fixes`, `Adds`, `Updates`, `Removes`), describe the observable effect, and leave out internal mechanics (file names, refactors, how you implemented it). For a breaking change, include the migration step. One sentence is often enough.
+A changeset is user-facing documentation that lands verbatim in a package CHANGELOG. Review its usefulness to someone upgrading, not only its presence and frontmatter. Follow [.changeset/README.md](.changeset/README.md) for the canonical writing and review standard, including proportional detail and migration guidance for default or breaking changes.
 
 When opening a PR with `gh`/the API, copy `.github/PULL_REQUEST_TEMPLATE.md` into the body and fill every section -- the GitHub UI injects it automatically but the CLI does not, and PRs missing it are auto-closed. Check the AI-generated code disclosure box and name the model. Tick checklist items only for what you actually verified; for test-only/docs/CI PRs, note why changeset/i18n/Discussion items are n/a.
 
@@ -157,6 +159,12 @@ Migrations live in `packages/core/src/database/migrations/`.
 - **Column types:** SQLite -- `text`, `integer`, `real`, `blob`. Booleans are `integer` defaulting to 0. Timestamps are `text` with ``defaultTo(sql`(datetime('now'))`)``. IDs are `text` primary keys (ULIDs from `ulidx`).
 - **Registration:** Migrations are statically imported in `runner.ts` and added to `StaticMigrationProvider`. Not auto-discovered (Workers bundler compatibility). When adding: create the file, add a static import in `runner.ts`, add it to `getMigrations()`.
 - **Multi-table migrations:** When altering all content tables, query `_emdash_collections` and loop. See `013_scheduled_publishing.ts`.
+
+Published migrations are immutable. Never edit or reorder one that has shipped; add the next monotonically increasing, zero-padded migration as a correction. Write `up` so it can restart after any completed statement, especially on D1 where a lost response can leave an ambiguous outcome.
+
+Preserve expand/deploy/contract compatibility: old application code must tolerate the expanded schema during a rolling deploy, and new code must tolerate incomplete backfills. When a migration changes existing `ec_*` tables, update `SchemaRegistry` so newly created tables receive the same shape. Use parameterized Kysely SQL, validated identifiers, bounded batches, portable dialect behavior, and the repository's index conventions.
+
+Test representative upgrades from existing data, retry after partial completion, test every supported dialect, and test with realistically large data shapes. Add a user-facing changeset for each affected published package.
 
 ## Indexes
 
@@ -360,7 +368,8 @@ Tool directives are exempt from all of the above: `eslint-disable`, `oxlint-disa
 
 - Use `import.meta.env.DEV` / `import.meta.env.PROD` (Vite/Astro standard). Never `process.env.NODE_ENV`.
 - Dev-only endpoints must check `import.meta.env.DEV` and return 403 otherwise -- it's a compile-time constant, unspoofable at runtime.
-- Secrets pattern: `import.meta.env.EMDASH_X || import.meta.env.X || ""`.
+- Public build-time config pattern: `import.meta.env.EMDASH_X || import.meta.env.X || ""`.
+- **Secrets read `process.env` only, never `import.meta.env`** -- Vite statically inlines `import.meta.env`, which bakes build-machine secrets into the bundle and shadows runtime values set on the deployment platform. See `packages/core/src/config/secrets.ts`.
 
 ## Cloudflare Env
 
@@ -375,7 +384,7 @@ In libraries used in a Worker but not themselves Workers, install `@cloudflare/w
 # Testing
 
 - **Framework:** vitest. Tests in `packages/core/tests/`.
-- **No mocks for the DB.** SQLite (`better-sqlite3`) by default. PostgreSQL parity tests via a real `pg` connection with per-test schema isolation (set `EMDASH_TEST_PG` to a connection string for a role with `CREATEDB` to opt in).
+- **No mocks for the DB.** Node's built-in SQLite driver by default. PostgreSQL parity tests via a real `pg` connection with per-test schema isolation (set `EMDASH_TEST_PG` to a connection string for a role with `CREATEDB` to opt in).
 - **Utilities:** `tests/utils/test-db.ts` exposes `setupTestDatabase()`, `setupTestDatabaseWithCollections()`, `teardownTestDatabase()` for SQLite and `setupTestPostgresDatabase()` etc. for Postgres. Dialect-agnostic: `setupForDialect`, `setupForDialectWithCollections`, `teardownForDialect`, plus `describeEachDialect(name, fn)`. Use the dialect wrapper for query-builder code -- regressions tend to be dialect-specific.
 - **Structure:** `tests/unit/`, `tests/integration/`, `tests/e2e/` (Playwright). Test files mirror source structure. Each test gets a fresh DB.
 

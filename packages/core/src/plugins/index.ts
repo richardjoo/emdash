@@ -44,6 +44,7 @@ export type { PluginContextFactoryOptions } from "./context.js";
 // Hooks
 export { HookPipeline, createHookPipeline } from "./hooks.js";
 export type { HookResult } from "./hooks.js";
+export { ContentSaveRejectedError, isContentSaveRejection } from "./save-rejection.js";
 
 // Email pipeline
 export { EmailPipeline, EmailNotConfiguredError, EmailRecursionError } from "./email.js";
@@ -122,6 +123,8 @@ export type {
 	UserInfo,
 	UserAccess,
 	ContentItem,
+	ContentCreateOptions,
+	ContentWriteInput,
 	MediaItem,
 	ContentListOptions,
 	MediaListOptions,
