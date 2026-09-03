@@ -1,0 +1,15 @@
+# TODO
+
+| ID         | Item                                                                    | Status    | Owner                  | Due date     | Notes                                                                                         |
+| ---------- | ----------------------------------------------------------------------- | --------- | ---------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| FOLLOW-001 | Synchronize the fork before child-site work                             | Completed | OpenCode               | 2026-09-03   | PR #15 merged through upstream `264940dc`; fork is `66` ahead and `0` behind                  |
+| FOLLOW-002 | Determine Cloudflare Web Analytics intent and exact CSP requirements    | Completed | OpenCode               | 2026-09-03   | Automatic setup is active; deploy token scope was not widened                                 |
+| FOLLOW-003 | Allow the analytics beacon on public HTML                               | Completed | OpenCode               | 2026-09-03   | Child-site PR #45 merged as `27fe2a5`                                                         |
+| FOLLOW-004 | Exclude `/_emdash` HTML from analytics injection                        | Completed | OpenCode               | 2026-09-03   | Child-site PR #46 merged as `e1b48a0`; admin CSP remains strict                               |
+| FOLLOW-005 | Verify the production deployment and browser behavior                   | Completed | OpenCode               | 2026-09-03   | Run `33811157462`; Worker `b9f0a711-f718-4e36-ba42-9ea0f7a3e326`; browser and MCP checks pass |
+| FOLLOW-006 | Refresh and merge the child-site handover                               | Completed | OpenCode               | 2026-09-03   | Package `2026.09.03-2` merged in child-site PR #47 as `9e068a6`                               |
+| FOLLOW-007 | Update the orchestrator registry and follow-up handover                 | Completed | OpenCode               | 2026-09-03   | Registry and this dated package record the final state                                        |
+| FOLLOW-008 | Confirm production need for automatic webhook notifications             | Open      | Richard Joo + OpenCode | TBD          | Plugin `0.2.0` automatic hooks remain skipped; use an official fix or remove the plugin       |
+| FOLLOW-009 | Consume the released admin bundle optimization                          | Open      | OpenCode               | Next release | Do not consume upstream PR #2516 directly                                                     |
+| FOLLOW-010 | Continue the child site's editorial and content-continuity backlog      | Open      | Richard Joo + OpenCode | TBD          | Use child-site handover package `2026.09.03-2`                                                |
+| FOLLOW-011 | Remove the Wrangler patch after its documented upstream release trigger | Open      | OpenCode               | Next release | Remove the exact pin, package extension, and patch together after traced-build verification   |
