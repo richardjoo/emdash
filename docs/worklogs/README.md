@@ -33,6 +33,7 @@ Internal AI-facing project operations records. This directory is not published t
 
 ## Current Packages
 
+- [`2026-09-04-richardjoo-com-navigation/`](2026-09-04-richardjoo-com-navigation/README.md) -- required fork synchronization followed by the `richardjoo-com` primary-navigation rollout, production menu replacement, responsive verification, and handover version `2026.09.04-1`.
 - [`2026-09-03-richardjoo-com-csp-follow-up/`](2026-09-03-richardjoo-com-csp-follow-up/README.md) -- fork synchronization and child-site Cloudflare Web Analytics CSP follow-up, including two production deployments, browser verification, and handover version `2026.09.03-2`.
 - [`2026-09-03-richardjoo-com-0360-upgrade/`](2026-09-03-richardjoo-com-0360-upgrade/README.md) -- production upgrade of `richardjoo-com` from released EmDash `0.33.0` to `0.36.0`, including D1 backup and migrations, deployment, live verification, and child-site handover updates.
 - [`2026-08-13-doc-consistency-sync/`](2026-08-13-doc-consistency-sync/README.md) -- upstream sync and documentation consistency package covering Node prerequisites, SSR/static rendering guidance, and sandbox-runner platform notes.

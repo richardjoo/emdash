@@ -1,0 +1,15 @@
+# TODO
+
+| ID      | Item                                                                    | Status    | Owner                  | Due date     | Notes                                                                                        |
+| ------- | ----------------------------------------------------------------------- | --------- | ---------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| NAV-001 | Synchronize the fork before child-site work                             | Completed | OpenCode               | 2026-09-04   | PR #17 merged through upstream `108c753b`; fork is `70` ahead and `0` behind                 |
+| NAV-002 | Implement and verify the approved child-site information architecture   | Completed | OpenCode               | 2026-09-04   | Feature `764648b`; local typecheck, build, route, and responsive checks passed               |
+| NAV-003 | Merge and deploy the child-site runtime                                 | Completed | OpenCode               | 2026-09-04   | PR #48 merged as `fd6a0e9`; run `33942840298`; Worker `dfab1e44-cea7-4b6b-be94-56c18b429ea6` |
+| NAV-004 | Replace and verify the authoritative live `primary` menu                | Completed | OpenCode               | 2026-09-04   | Routine-PAT MCP write/read confirmed four items at `2026-09-05T03:58:27.583Z`                |
+| NAV-005 | Verify the completed production behavior                                | Completed | OpenCode               | 2026-09-04   | Six responsive views, light/dark mode, all linked routes, and CSP boundaries passed          |
+| NAV-006 | Refresh and merge the child-site handover                               | Completed | OpenCode               | 2026-09-04   | Package `2026.09.04-1` merged in child-site PR #49 as `3d78e76`                              |
+| NAV-007 | Update the orchestrator registry and rollout handover                   | Completed | OpenCode               | 2026-09-04   | Registry and this dated package record the final state                                       |
+| NAV-008 | Reconcile evergreen page and footer/social drift                        | Open      | Richard Joo + OpenCode | TBD          | Continue from child tasks T08 and T09                                                        |
+| NAV-009 | Define a safe production content snapshot/export strategy               | Open      | Richard Joo + OpenCode | TBD          | Continue from child task T10                                                                 |
+| NAV-010 | Confirm production need for automatic webhook notifications             | Open      | Richard Joo + OpenCode | TBD          | Plugin `0.2.0` automatic hooks remain skipped; use an official fix or remove the plugin      |
+| NAV-011 | Remove the Wrangler patch after its documented upstream release trigger | Open      | OpenCode               | Next release | Remove the exact pin, package extension, and patch together after traced-build verification  |
