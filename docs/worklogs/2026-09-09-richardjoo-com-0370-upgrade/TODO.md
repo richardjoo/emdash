@@ -1,0 +1,17 @@
+# TODO
+
+| ID      | Item                                                                    | Status    | Owner                  | Due date     | Notes                                                                                         |
+| ------- | ----------------------------------------------------------------------- | --------- | ---------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| UPG-001 | Synchronize the fork before child-site package work                     | Completed | OpenCode               | 2026-09-09   | PR #19 merged through upstream `44114afd`; fork is `74` ahead and `0` behind                  |
+| UPG-002 | Review released EmDash `0.37.0` against the child site                  | Completed | OpenCode               | 2026-09-09   | Release commit `fc87efeb`; migration and MCP compatibility reviewed                           |
+| UPG-003 | Upgrade and verify the child-site packages                              | Completed | OpenCode               | 2026-09-09   | Commit `9d2a47d`; local checks and PR CI `34435380544` passed                                 |
+| UPG-004 | Back up and migrate production D1 before deployment                     | Completed | OpenCode               | 2026-09-09   | Backup run `34434143085`; migration `074`; no pending or unknown migrations                   |
+| UPG-005 | Merge and deploy the child-site runtime                                 | Completed | OpenCode               | 2026-09-09   | PR #50 merged as `1a742f3`; run `34436915120`; Worker `55e5ec6c-36d6-4c25-b80f-1117ec2bbb73`  |
+| UPG-006 | Verify the completed production behavior                                | Completed | OpenCode               | 2026-09-09   | Public routes, forms, admin, CSP, analytics resources, MCP, menu, and migration checks passed |
+| UPG-007 | Refresh and merge the child-site handover                               | Completed | OpenCode               | 2026-09-09   | Package `2026.09.09-1` merged in child-site PR #51 as `ad0ba5a`                               |
+| UPG-008 | Update the orchestrator registry and rollout handover                   | Completed | OpenCode               | 2026-09-09   | Registry and this dated package record the final state                                        |
+| UPG-009 | Reconcile evergreen page and footer/social drift                        | Open      | Richard Joo + OpenCode | TBD          | Continue from child tasks T08 and T09                                                         |
+| UPG-010 | Define a safe production content snapshot/export strategy               | Open      | Richard Joo + OpenCode | TBD          | Continue from child task T10                                                                  |
+| UPG-011 | Confirm production need for automatic webhook notifications             | Open      | Richard Joo + OpenCode | TBD          | Plugin `0.2.0` automatic hooks remain skipped; use an official fix or remove the plugin       |
+| UPG-012 | Consume the admin bundle optimization after an official release         | Open      | OpenCode               | Next release | Do not consume the separate performance branch or a local package                             |
+| UPG-013 | Remove the Wrangler patch after its documented upstream release trigger | Open      | OpenCode               | Next release | Remove the exact pin, package extension, and patch together after traced-build verification   |
