@@ -32,6 +32,8 @@ Before starting any work that involves editing code, run `pnpm lint:json | jq '.
 
 If repo commands fail before the workspace even loads, switch to the Node version pinned in `.nvmrc` first. Running under the wrong Node version can break `pnpm`/`oxlint` before you reach repo checks.
 
+Run `pnpm build` from the repository root before `pnpm typecheck`. Package-scoped builds are not sufficient because typecheck resolves declaration output from other workspace packages.
+
 During work:
 
 - `pnpm lint:quick` after every edit (sub-second)
